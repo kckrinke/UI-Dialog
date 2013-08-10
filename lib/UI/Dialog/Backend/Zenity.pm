@@ -364,7 +364,7 @@ sub list {
 
     my $command = $self->_mk_cmnd(" --list",$args);
     $command .= ($args->{'checklist'}) ? ' --checklist' : ($args->{'radiolist'}) ? ' --radiolist' : "";
-    $command .= ' --separator "\n"';
+    $command .= ' --separator $\'\n\'';
     #: not quite sure how to implement the editability...
     #    $command .= ' --editable' unless not $args->{'editable'};
     #: --text is not implemented for list widgets, yet...
