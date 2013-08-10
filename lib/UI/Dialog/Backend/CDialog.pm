@@ -97,6 +97,8 @@ sub new {
     $self->{'_opts'}->{'tab-len'} = $cfg->{'tab-len'} || 0;
     $self->{'_opts'}->{'listheight'} = $cfg->{'listheight'} || $cfg->{'menuheight'} || 5;
     $self->{'_opts'}->{'formheight'} = $cfg->{'formheight'} || $cfg->{'listheight'} || 5;
+    $self->{'_opts'}->{'yes-label'} = $cfg->{'yes-label'} || undef();
+    $self->{'_opts'}->{'no-label'} = $cfg->{'no-label'} || undef();
 
     $self->_determine_dialog_variant();
     return($self);
@@ -187,6 +189,8 @@ sub _mk_cmnd {
 		$cmnd .= ' --shadow' unless not $args->{'shadow'};
 		$cmnd .= ' --tab-correct' unless not $args->{'tab-correct'};
 		$cmnd .= ' --tab-len "'.$args->{'tab-len'}.'"' unless not $args->{'tab-len'};
+		$cmnd .= ' --yes-label "'.$args->{'yes-label'}.'"' unless not $args->{'yes-label'};
+		$cmnd .= ' --no-label "'.$args->{'no-label'}.'"' unless not $args->{'no-label'};
 
 		# --item-help                        #<-- NEEDS WORK
 		# --no-kill                          #<-- tailboxbg only
