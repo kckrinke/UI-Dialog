@@ -28,6 +28,11 @@ for finding out about the various widgets, please read the fine Xdialog(1) manua
 as it's got the definitive details on the Xdialog application itself. This perldoc
 simply briefly describes all the supported options and widgets.
 
+Note that XDialog supports newlines (\n) within it's message text area,
+UI::Dialog strips the newlines in order to not break all the other backends. If
+you're using XDialog specifically, you can set the B<literal> option to 1 and the
+message text will be left as it was literally given.
+
 =head1 EXPORT
 
 =over 2
