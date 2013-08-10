@@ -3,6 +3,7 @@
   * Updated author email address, finally
   * Added new UI::Dialog::Screen::Menu class
   * POD tweaks ala Debian packaging patch
+  * Resolved CPAN tickets: 35289, 33365, 18134, 32706, 82093
 
  -- Kevin C. Krinke <kevin@krinke.ca>
 	
