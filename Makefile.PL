@@ -40,7 +40,7 @@ WriteMakefile( 'NAME'		=> 'UI::Dialog',
 						 'lib/UI/Dialog/Backend/Whiptail.pod' => '$(INST_LIBDIR)/Dialog/Backend/Whiptail.pod',
 						 'lib/UI/Dialog/Backend/XDialog.pod'  => '$(INST_LIBDIR)/Dialog/Backend/XDialog.pod',
 						 'lib/UI/Dialog/Backend/XOSD.pod'     => '$(INST_LIBDIR)/Dialog/Backend/XOSD.pod',
-						 'lib/UI/Dialog/Backend/Zenity.pod'   => '$(INST_LIBDIR)/Dialog/Backend/Zenity.pod'
+						 'lib/UI/Dialog/Backend/Zenity.pod'   => '$(INST_LIBDIR)/Dialog/Backend/Zenity.pod',
 						 'lib/UI/Dialog/Screen/Menu.pod'      => '$(INST_LIBDIR)/Dialog/Screen/Menu.pod',
                        }
 			 );
