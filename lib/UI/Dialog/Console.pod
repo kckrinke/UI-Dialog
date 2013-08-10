@@ -131,11 +131,11 @@ module in the subject line.
 
 =head1 AUTHOR
 
-Kevin C. Krinke, E<lt>kckrinke@opendoorsoftware.comE<gt>
+Kevin C. Krinke, E<lt>kevin@krinke.caE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
- Copyright (C) 2003  Kevin C. Krinke <kckrinke@opendoorsoftware.com>
+ Copyright (C) 2013  Kevin C. Krinke <kevin@krinke.ca>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
