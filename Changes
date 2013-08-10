@@ -1,3 +1,11 @@
+1.09 - Sat, 10 Aug 2013 03:04:42 -0500
+
+  * Updated author email address, finally
+  * Added new UI::Dialog::Screen::Menu class
+  * POD tweaks ala Debian packaging patch
+
+ -- Kevin C. Krinke <kevin@krinke.ca>
+	
 1.08 - Sat, 02 Oct 2004 00:05:34 -0400
 
   * UI::Dialog::Backend::Nautilus now correctly determins the user's desktop directory using Gnome2::GConf (if found) or via kludge.
