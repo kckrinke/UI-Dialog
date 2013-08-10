@@ -3,6 +3,12 @@ use strict;
 use warnings;
 use diagnostics;
 use constant { TRUE => 1, FALSE => 0 };
+
+BEGIN {
+    use vars qw($VERSION);
+    $VERSION = '1.09';
+}
+
 use UI::Dialog;
 
 # Example Usage
