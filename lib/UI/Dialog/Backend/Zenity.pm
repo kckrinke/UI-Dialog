@@ -466,6 +466,38 @@ sub fselect {
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#: directory select
+sub dselect {
+    my $self = shift();
+    my $caller = (caller(1))[3] || 'main';
+    $caller = ($caller =~ /^UI\:\:Dialog\:\:Backend\:\:/) ? ((caller(2))[3]||'main') : $caller;
+    if ($_[0] && $_[0] eq 'caller') { shift(); $caller = shift(); }
+    my $args = $self->_pre($caller,@_);
+
+    $args->{'path'} = (-d $args->{'path'}) ? $args->{'path'}."/" : $args->{'path'};
+    $args->{'path'} =~ s!/+!/!g;
+
+    my $command = $self->_mk_cmnd(" --file-selection --directory",$args);
+    $command .= ' --filename "' . ($args->{'path'}||abs_path()) . '"';
+
+    $self->_debug("fselect: ".$args->{'path'});
+    my ($rv,$file) = $self->command_string($command);
+    $self->rv($rv||'null');
+    $self->ra('null');
+    $self->rs('null');
+    my $this_rv;
+    if ($rv && $rv >= 1) {
+		$this_rv = 0;
+    } else {
+		$self->ra($file);
+		$self->rs($file);
+		$this_rv = $file;
+    }
+    $self->_post($args);
+    return($this_rv);
+}
+
+#:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #: calendar
 sub calendar {
     my $self = shift();
