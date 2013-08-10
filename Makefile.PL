@@ -7,7 +7,8 @@ WriteMakefile( 'NAME'		=> 'UI::Dialog',
 			   'PREREQ_PM'	=> { Text::Wrap => 0 },	# e.g., Module::Name => 1.1
 			   ($] >= 5.005 ? ## Add these new keywords supported since 5.005
 				( #ABSTRACT_FROM   => 'lib/UI/Dialog.pm', # retrieve abstract from module
-				 AUTHOR          => 'Kevin C. Krinke <kckrinke@opendoorsoftware.com>') : ()),
+				 AUTHOR          => 'Kevin C. Krinke <kevin@krinke.ca>') : ()
+               ),
 			   'PM_FILTER' => 'perl -pe "s!\\Q/usr/bin/perl\\E!$(FULLPERL)!g"',
 			   'PM' => { 'lib/UI/Dialog.pm'                   => '$(INST_LIBDIR)/Dialog.pm',
 						 'lib/UI/Dialog/Console.pm'           => '$(INST_LIBDIR)/Dialog/Console.pm',
@@ -24,6 +25,7 @@ WriteMakefile( 'NAME'		=> 'UI::Dialog',
 						 'lib/UI/Dialog/Backend/XDialog.pm'   => '$(INST_LIBDIR)/Dialog/Backend/XDialog.pm',
 						 'lib/UI/Dialog/Backend/XOSD.pm'      => '$(INST_LIBDIR)/Dialog/Backend/XOSD.pm',
 						 'lib/UI/Dialog/Backend/Zenity.pm'    => '$(INST_LIBDIR)/Dialog/Backend/Zenity.pm',
+						 'lib/UI/Dialog/Screen/Menu.pm'       => '$(INST_LIBDIR)/Dialog/Screen/Menu.pm',
 						 'lib/UI/Dialog.pod'                  => '$(INST_LIBDIR)/Dialog.pod',
 						 'lib/UI/Dialog/Console.pod'          => '$(INST_LIBDIR)/Dialog/Console.pod',
 						 'lib/UI/Dialog/Gauged.pod'           => '$(INST_LIBDIR)/Dialog/Gauged.pod',
@@ -38,5 +40,7 @@ WriteMakefile( 'NAME'		=> 'UI::Dialog',
 						 'lib/UI/Dialog/Backend/Whiptail.pod' => '$(INST_LIBDIR)/Dialog/Backend/Whiptail.pod',
 						 'lib/UI/Dialog/Backend/XDialog.pod'  => '$(INST_LIBDIR)/Dialog/Backend/XDialog.pod',
 						 'lib/UI/Dialog/Backend/XOSD.pod'     => '$(INST_LIBDIR)/Dialog/Backend/XOSD.pod',
-						 'lib/UI/Dialog/Backend/Zenity.pod'   => '$(INST_LIBDIR)/Dialog/Backend/Zenity.pod' }
+						 'lib/UI/Dialog/Backend/Zenity.pod'   => '$(INST_LIBDIR)/Dialog/Backend/Zenity.pod'
+						 'lib/UI/Dialog/Screen/Menu.pod'      => '$(INST_LIBDIR)/Dialog/Screen/Menu.pod',
+                       }
 			 );
