@@ -222,8 +222,13 @@ sub gen_tempfile_name {
     if (eval("require File::Temp; 1")) {
 		use File::Temp qw( tempfile );
 		my ($fh,$filename) = tempfile( UNLINK => 1 ) or croak( "Can't create tempfile: $!" );
-		return($filename) unless wantarray;
-		return($fh,$filename);
+        if (wantarray) {
+            return($fh,$filename);
+        } else {
+            close($fh); # actually required on win32
+            return($filename);
+        }
+        return($fh,$filename);
     } else {
 		my $mktemp = $self->_find_bin('mktemp');
 		if ($mktemp && -x $mktemp) {
