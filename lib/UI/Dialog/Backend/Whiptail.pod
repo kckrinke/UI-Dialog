@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::Whiptail
+ UI::Dialog::Backend::Whiptail
 
 =head1 SYNOPSIS
 
@@ -28,7 +28,7 @@ basic dialog variant in comparison to things like Xdialog and cDialog.
 
 =over 2
 
-None
+ None
 
 =back
 
@@ -36,7 +36,7 @@ None
 
 =over 2
 
-UI::Dialog::Backend
+ UI::Dialog::Backend
 
 =back
 
@@ -68,7 +68,7 @@ and uses them as the defaults when interacting with the various widgets.
 
 =over 6
 
-A blessed object reference of the UI::Dialog::Backend::Whiptail class.
+ A blessed object reference of the UI::Dialog::Backend::Whiptail class.
 
 =back
 
@@ -132,7 +132,7 @@ Present the end user with a message box that has two buttons, yes and no.
 
 =over 6
 
-TRUE (1) for a response of YES or FALSE (0) for anything else.
+ TRUE (1) for a response of YES or FALSE (0) for anything else.
 
 =back
 
@@ -655,18 +655,18 @@ TRUE (1) if the widget closed fine and FALSE (0) for anything else.
 
 =item MAN FILES
 
-whiptail(1)
+ whiptail(1)
 
 =back
 
 =head1 BUGS
 
-Please email the author with any bug reports. Include the name of the
-module in the subject line.
+ Please email the author with any bug reports. Include the name of the
+ module in the subject line.
 
 =head1 AUTHOR
 
-Kevin C. Krinke, E<lt>kckrinke@opendoorsoftware.comE<gt>
+ Kevin C. Krinke, E<lt>kckrinke@opendoorsoftware.comE<gt> 
 
 =head1 COPYRIGHT AND LICENSE
 
