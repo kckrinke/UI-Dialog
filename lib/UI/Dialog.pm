@@ -284,6 +284,8 @@ None
 
 =over 2
 
+=back
+
 =head2 new( @options )
 
 =over 4
@@ -347,11 +349,11 @@ decided during object creation.
 
 =back
 
-=back
-
 =head1 STATE METHODS
 
 =over 2
+
+=back
 
 =head2 state( )
 
@@ -387,9 +389,9 @@ a single SCALAR.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 ra( )
 
@@ -421,9 +423,9 @@ an ARRAY.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 rs( )
 
@@ -455,9 +457,9 @@ a SCALAR.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 rv( )
 
@@ -489,11 +491,11 @@ a SCALAR.
 
 =back
 
-=back
-
 =head1 WIDGET METHODS
 
 =over 2
+
+=back
 
 =head2 yesno( )
 
@@ -529,9 +531,9 @@ TRUE (1) for a response of YES or FALSE (0) for anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 msgbox( )
 
@@ -563,9 +565,9 @@ TRUE (1) for a response of OK or FALSE (0) for anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 inputbox( )
 
@@ -598,9 +600,9 @@ a SCALAR if the response is OK and FALSE (0) for anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 password( )
 
@@ -636,9 +638,9 @@ a SCALAR if the response is OK and FALSE (0) for anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 textbox( )
 
@@ -671,9 +673,9 @@ TRUE (1) if the response is OK and FALSE (0) for anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 menu( )
 
@@ -709,9 +711,9 @@ anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 checklist( )
 
@@ -748,9 +750,9 @@ anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 radiolist( )
 
@@ -787,9 +789,9 @@ anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 fselect( )
 
@@ -821,9 +823,9 @@ a SCALAR if the response is OK and FALSE (0) for anything else.
 
 =back
 
-=back
-
 =over 2
+
+=back
 
 =head2 dselect( )
 
@@ -856,13 +858,11 @@ a SCALAR if the response is OK and FALSE (0) for anything else.
 
 =back
 
-=back
-
 =head1 SEE ALSO
 
-=item PERLDOC
-
 =over 2
+
+=item PERLDOC
 
  UI::Dialog::GNOME
  UI::Dialog::KDE
@@ -880,9 +880,9 @@ a SCALAR if the response is OK and FALSE (0) for anything else.
 
 =back
 
-=item MAN FILES
-
 =over 2
+
+=item MAN FILES
 
  dialog(1), whiptail(1), zenity(1), gdialog(1), Xdialog(1),
  osd_cat(1), kdialog(1) and nautilus(1)
