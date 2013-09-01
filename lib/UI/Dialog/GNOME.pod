@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::GNOME
+UI::Dialog::GNOME - GNOME GUI meta-class for UI::Dialog.
 
 =head1 SYNOPSIS
 

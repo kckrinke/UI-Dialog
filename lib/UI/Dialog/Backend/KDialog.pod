@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::KDialog
+UI::Dialog::Backend::KDialog - backend for the KDE dialog variant.
 
 =head1 SYNOPSIS
 

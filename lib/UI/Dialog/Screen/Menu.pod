@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Screen::Menu
+UI::Dialog::Screen::Menu - wrapper to screen dialogs.
 
 =head1 SYNOPSIS
 

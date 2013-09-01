@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend
+UI::Dialog::Backend - simply a collection of primarily internal methods.
 
 =head1 SYNOPSIS
 

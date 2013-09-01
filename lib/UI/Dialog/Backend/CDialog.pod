@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::CDialog
+UI::Dialog::Backend::CDialog - backend for the console dialog(1) variant.
 
 =head1 SYNOPSIS
 

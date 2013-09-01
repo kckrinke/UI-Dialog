@@ -1,6 +1,6 @@
 =head1 NAME
 
- UI::Dialog::Backend::Whiptail
+ UI::Dialog::Backend::Whiptail - Backend for the Whiptail dialog variant
 
 =head1 SYNOPSIS
 

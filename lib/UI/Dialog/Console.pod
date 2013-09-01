@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Console
+UI::Dialog::Console - console meta-class for UI::Dialog.
 
 =head1 SYNOPSIS
 

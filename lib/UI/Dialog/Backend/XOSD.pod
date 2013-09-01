@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::XOSD
+UI::Dialog::Backend::XOSD - backend for the osd_cat(1).
 
 =head1 SYNOPSIS
 

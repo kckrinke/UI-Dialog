@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::GDialog
+UI::Dialog::Backend::GDialog - backend for the antiquated GNOME dialog variant.
 
 =head1 SYNOPSIS
 

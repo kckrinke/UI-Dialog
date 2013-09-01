@@ -228,7 +228,7 @@ sub dselect   { return(shift()->{'_ui_dialog'}->dselect(@_));   }
 
 =head1 NAME
 
-UI::Dialog
+UI::Dialog - wrapper for various dialog applications.
 
 =head1 SYNOPSIS
 

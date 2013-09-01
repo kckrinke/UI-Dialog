@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Gauged
+UI::Dialog::Gauged - wrapper support of gauge related functions.
 
 =head1 SYNOPSIS
 

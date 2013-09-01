@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::XDialog
+UI::Dialog::Backend::XDialog - backend for the Xdialog(1)
 
 =head1 SYNOPSIS
 

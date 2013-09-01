@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::KDE
+UI::Dialog::KDE - KDE GUI meta-class for UI::Dialog.
 
 =head1 SYNOPSIS
 

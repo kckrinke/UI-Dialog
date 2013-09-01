@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::ASCII
+UI::Dialog::Backend::ASCII - Dialog backend for the native Perl mode of basic text.
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-UI::Dialog::Backend::Zenity
+UI::Dialog::Backend::Zenity - wrapper of the Zenity application.
 
 =head1 SYNOPSIS
 
