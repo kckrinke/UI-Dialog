@@ -1,3 +1,11 @@
+1.10 - Sun, 01 Sep 2013 21:12:22 -0500
+
+  * Input and arguments now escaped "more". Not sure it's "secure", but it's definitely better.
+  * Added new UI::Dialog::Backend::NotifySend class
+  * More POD tweaks / fixes, thanks Debian maintainers!
+
+ -- Kevin C. Krinke <kevin@krinke.ca>
+
 1.09 - Sat, 10 Aug 2013 03:04:42 -0500
 
   * Updated author email address, finally

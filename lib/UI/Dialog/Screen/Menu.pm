@@ -6,7 +6,7 @@ use constant { TRUE => 1, FALSE => 0 };
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION = '1.09';
+    $VERSION = '1.10';
 }
 
 use UI::Dialog;
