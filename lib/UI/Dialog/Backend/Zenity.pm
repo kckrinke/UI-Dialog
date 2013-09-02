@@ -51,30 +51,28 @@ sub new {
 	} elsif ($ENV{'PATH'}) { $self->{'PATHS'} = [ split(/:/,$ENV{'PATH'}) ]; }
 	else { $self->{'PATHS'} = ''; }
 
-    $self->{'_opts'}->{'bin'} = $self->_find_bin('zenity');
-    unless (-x $self->{'_opts'}->{'bin'}) {
-		croak("the zenity binary could not be found at: ".$self->{'_opts'}->{'bin'});
-    }
-
-    $self->{'_opts'}->{'title'} = $self->cfg_escape($cfg->{'title'});
-
 	$self->{'_opts'}->{'literal'} = $cfg->{'literal'} || 0;
     $self->{'_opts'}->{'debug'} = $cfg->{'debug'} || undef();
     $self->{'_opts'}->{'window-icon'} = $cfg->{'window-icon'} || undef();
+    $self->{'_opts'}->{'title'} = $cfg->{'title'} || undef();
     $self->{'_opts'}->{'width'} = $cfg->{'width'} || 65;
     $self->{'_opts'}->{'height'} = $cfg->{'height'} || 10;
     $self->{'_opts'}->{'display'} = $cfg->{'display'} || undef();
     $self->{'_opts'}->{'name'} = $cfg->{'name'} || undef();
     $self->{'_opts'}->{'class'} = $cfg->{'class'} || undef();
+    $self->{'_opts'}->{'bin'} = $self->_find_bin('zenity');
     $self->{'_opts'}->{'autoclear'} = $cfg->{'autoclear'} || 0;
     $self->{'_opts'}->{'clearbefore'} = $cfg->{'clearbefore'} || 0;
     $self->{'_opts'}->{'clearafter'} = $cfg->{'clearafter'} || 0;
-    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || undef();
+    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || '/usr/bin/beep';
     $self->{'_opts'}->{'beepbefore'} = $cfg->{'beepbefore'} || 0;
     $self->{'_opts'}->{'beepafter'} = $cfg->{'beepafter'} || 0;
     $self->{'_opts'}->{'callbacks'} = $cfg->{'callbacks'} || undef();
     $self->{'_opts'}->{'timeout'} = $cfg->{'timeout'} || 0;
     $self->{'_opts'}->{'wait'} = $cfg->{'wait'} || 0;
+    unless (-x $self->{'_opts'}->{'bin'}) {
+		croak("the zenity binary could not be found at: ".$self->{'_opts'}->{'bin'});
+    }
 
     my $command = $self->{'_opts'}->{'bin'}." --version";
     my $version = `$command 2>&1`;
