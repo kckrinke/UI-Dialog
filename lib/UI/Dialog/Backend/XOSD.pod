@@ -109,7 +109,7 @@ values decided during object creation.
 
 =head1 METHODS
 
-1=head2 line( )
+=head2 line( )
 
 =over 4
 
