@@ -29,6 +29,8 @@ lib/UI/Dialog/Backend/KDialog.pm
 lib/UI/Dialog/Backend/KDialog.pod
 lib/UI/Dialog/Backend/Nautilus.pm
 lib/UI/Dialog/Backend/Nautilus.pod
+lib/UI/Dialog/Backend/NotifySend.pm
+lib/UI/Dialog/Backend/NotifySend.pod
 lib/UI/Dialog/Backend/Whiptail.pm
 lib/UI/Dialog/Backend/Whiptail.pod
 lib/UI/Dialog/Backend/XDialog.pm
