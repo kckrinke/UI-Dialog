@@ -78,6 +78,22 @@ sub xosd {
     return($self->{'_xosd'});
 }
 
+#: Provide the API interface to notify-send
+sub notify_send {
+    my $self = shift();
+    my @args = (@_ %2 == 0) ? (@_) : ();
+    my $notify_send = $self->{'_notify_send'} || {};
+    unless (ref($notify_send) eq "UI::Dialog::Backend::NotifySend") {
+		if ($self->_find_bin('notify-send')) {
+			if (eval "require UI::Dialog::Backend::NotifySend; 1") {
+				require UI::Dialog::Backend::NotifySend;
+				$self->{'_notify_send'} = new UI::Dialog::Backend::NotifySend (@args);
+			}
+		}
+    }
+    return($self->{'_notify_send'});
+}
+
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #: State Methods
 #:

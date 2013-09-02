@@ -87,6 +87,30 @@ silently fail.
 
 =back
 
+=head2 notify_send
+
+=over 4
+
+=item EXAMPLE
+
+=over 6
+
+ $d->notify_send->notify_send( "a line of text on your screen" );
+
+=back
+
+=item DESCRIPTION
+
+=over 6
+
+This method gives access to the UI::Dialog::Backend::NotifySend class. This will
+automagically try to load the UI::Dialog::Backend::NotifySend module or it will
+silently fail.
+
+=back
+
+=back
+
 =head1 STATE METHODS
 
 =head2 attr( )
