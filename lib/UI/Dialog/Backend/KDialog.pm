@@ -50,27 +50,28 @@ sub new {
 	} elsif ($ENV{'PATH'}) { $self->{'PATHS'} = [ split(/:/,$ENV{'PATH'}) ]; }
 	else { $self->{'PATHS'} = ''; }
 
+    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('kdialog');
+    unless (-x $self->{'_opts'}->{'bin'}) {
+		croak("the kdialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
+    }
+    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || '/usr/bin/beep';
+
 	$self->{'_opts'}->{'literal'} = $cfg->{'literal'} || 0;
     $self->{'_opts'}->{'callbacks'} = $cfg->{'callbacks'} || undef();
     $self->{'_opts'}->{'debug'} = $cfg->{'debug'} || undef();
-    $self->{'_opts'}->{'caption'} = $cfg->{'caption'} || undef();
+    $self->{'_opts'}->{'caption'} = $self->cfg_escape($cfg->{'caption'});
     $self->{'_opts'}->{'icon'} = $cfg->{'icon'} || undef();
     $self->{'_opts'}->{'miniicon'} = $cfg->{'miniicon'} || undef();
-    $self->{'_opts'}->{'title'} = $cfg->{'title'} || undef();
+    $self->{'_opts'}->{'title'} = $self->cfg_escape($cfg->{'title'});
     $self->{'_opts'}->{'width'} = $cfg->{'width'} || 65;
     $self->{'_opts'}->{'height'} = $cfg->{'height'} || 10;
-    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('kdialog');
     $self->{'_opts'}->{'autoclear'} = $cfg->{'autoclear'} || 0;
     $self->{'_opts'}->{'clearbefore'} = $cfg->{'clearbefore'} || 0;
     $self->{'_opts'}->{'clearafter'} = $cfg->{'clearafter'} || 0;
-    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || '/usr/bin/beep';
     $self->{'_opts'}->{'beepbefore'} = $cfg->{'beepbefore'} || 0;
     $self->{'_opts'}->{'beepafter'} = $cfg->{'beepafter'} || 0;
     $self->{'_opts'}->{'timeout'} = $cfg->{'timeout'} || 0;
     $self->{'_opts'}->{'wait'} = $cfg->{'wait'} || 0;
-    unless (-x $self->{'_opts'}->{'bin'}) {
-		croak("the kdialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
-    }
     return($self);
 }
 

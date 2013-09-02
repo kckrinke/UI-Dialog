@@ -65,9 +65,9 @@ sub new {
     #  --rc-file <gtkrc filename>
     $self->{'_opts'}->{'rcfile'} = $cfg->{'rcfile'} || undef();
     #  --backtitle <backtitle>
-    $self->{'_opts'}->{'backtitle'} = $cfg->{'backtitle'} || undef();
+    $self->{'_opts'}->{'backtitle'} = $self->cfg_escape($cfg->{'backtitle'});
     #  --title <title>
-    $self->{'_opts'}->{'title'} = $cfg->{'title'} || undef();
+    $self->{'_opts'}->{'title'} = $self->cfg_escape($cfg->{'title'});
     #  --allow-close | --no-close
     $self->{'_opts'}->{'allowclose'} = $cfg->{'allowclose'} || 0;
     $self->{'_opts'}->{'noclose'} = $cfg->{'noclose'} || 0;
@@ -106,7 +106,7 @@ sub new {
     #  --item-help (menubox, checklist, radiolist, buildlist and treeview)
     $self->{'_opts'}->{'itemhelp'} = $cfg->{'itemhelp'} || 0;
     #  --default-item <tag> (menubox)
-    $self->{'_opts'}->{'defaultitem'} = $cfg->{'defaultitem'} || undef();
+    $self->{'_opts'}->{'defaultitem'} = $self->cfg_escape($cfg->{'defaultitem'});
     #  --icon <xpm filename> (textbox, editbox, tailbox, logbox, fselect and dselect)
     $self->{'_opts'}->{'icon'} = $cfg->{'icon'} || undef();
     #  --no-ok (tailbox and logbox)
@@ -126,11 +126,11 @@ sub new {
     #  --check <label> !(infobox, gauge and progress)
     $self->{'_opts'}->{'check'} = $cfg->{'check'} || undef();
     #  --ok-label <label> !(wizard)
-    $self->{'_opts'}->{'oklabel'} = $cfg->{'oklabel'} || undef();
+    $self->{'_opts'}->{'oklabel'} = $self->cfg_escape($cfg->{'oklabel'});
     #  --cancel-label <label> !(wizard)
-    $self->{'_opts'}->{'cancellabel'} = $cfg->{'cancellabel'} || undef();
+    $self->{'_opts'}->{'cancellabel'} = $self->cfg_escape($cfg->{'cancellabel'});
     #  --beep | --beep-after (all)
-    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || '/usr/bin/beep';
+    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || undef;
     $self->{'_opts'}->{'beepbefore'} = $cfg->{'beepbefore'} || 0;
     $self->{'_opts'}->{'beepafter'} = $cfg->{'beepafter'} || 0;
     #  --begin <Yorg> <Xorg> (all)

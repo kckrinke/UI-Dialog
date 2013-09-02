@@ -191,6 +191,25 @@ sub command_array {
 #: Utility Methods
 #:
 
+#: properly quote tainted input
+sub shell_escape {
+    return "\Q$_[1]\E";
+}
+sub cfg_escape {
+    if (defined $_[1] && $_[1]) {
+        return "\Q$_[1]\E";
+    }
+    return undef;
+}
+sub arg_escape {
+    my $self = shift;
+    my $args = (@_ % 2) ? { @_, '_odd' } : { @_ };
+    my @out = ();
+    foreach my $k (keys %{$args}) {
+        push(@out,$k,$self->shell_escape($args->{$k}));
+    }
+    return {@out};
+}
 
 #: make some noise
 sub beep {
@@ -444,7 +463,7 @@ sub _post {
 #: merge the arguments with the default attributes, and arguments override defaults.
 sub _merge_attrs {
     my $self = shift();
-    my $args = (@_ % 2) ? { @_, '_odd' } : { @_ };
+    my $args = $self->arg_escape(@_);
     my $defs = $self->{'_opts'};
     foreach my $def (keys(%$defs)) {
 		$args->{$def} = $defs->{$def} unless $args->{$def};

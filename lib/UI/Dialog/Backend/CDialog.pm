@@ -54,51 +54,53 @@ sub new {
 	} elsif ($ENV{'PATH'}) { $self->{'PATHS'} = [ split(/$path_sep/,$ENV{'PATH'}) ]; }
 	else { $self->{'PATHS'} = ''; }
 
+    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('dialog');
+    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('dialog.exe') if $^O =~ /win32/i;
+    unless (-x $self->{'_opts'}->{'bin'}) {
+		croak("the dialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
+    }
+    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || '/usr/bin/beep';
+
+    $self->{'_opts'}->{'title'} = $self->cfg_escape($cfg->{'title'});
+    $self->{'_opts'}->{'backtitle'} = $self->cfg_escape($cfg->{'backtitle'});
+    $self->{'_opts'}->{'cancel-label'} = $self->cfg_escape($cfg->{'cancel-label'});
+    $self->{'_opts'}->{'exit-label'} = $self->cfg_escape($cfg->{'exit-label'});
+    $self->{'_opts'}->{'extra-label'} = $self->cfg_escape($cfg->{'extra-label'});
+    $self->{'_opts'}->{'help-label'} = $self->cfg_escape($cfg->{'help-label'});
+    $self->{'_opts'}->{'ok-label'} = $self->cfg_escape($cfg->{'ok-label'});
+    $self->{'_opts'}->{'yes-label'} = $self->cfg_escape($cfg->{'yes-label'});
+    $self->{'_opts'}->{'no-label'} = $self->cfg_escape($cfg->{'no-label'});
+
 	$self->{'_opts'}->{'literal'} = $cfg->{'literal'} || 0;
     $self->{'_opts'}->{'callbacks'} = $cfg->{'callbacks'} || undef();
     $self->{'_opts'}->{'timeout'} = $cfg->{'timeout'} || 0;
     $self->{'_opts'}->{'wait'} = $cfg->{'wait'} || 0;
     $self->{'_opts'}->{'debug'} = $cfg->{'debug'} || undef();
-    $self->{'_opts'}->{'title'} = $cfg->{'title'} || undef();
-    $self->{'_opts'}->{'backtitle'} = $cfg->{'backtitle'} || undef();
     $self->{'_opts'}->{'width'} = $cfg->{'width'} || 65;
     $self->{'_opts'}->{'height'} = $cfg->{'height'} || 10;
     $self->{'_opts'}->{'percentage'} = $cfg->{'percentage'} || 1;
     $self->{'_opts'}->{'colours'} = ($cfg->{'colours'} || $cfg->{'colors'}) ? 1 : 0;
-    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('dialog');
-    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('dialog.exe') if $^O =~ /win32/i;
     $self->{'_opts'}->{'autoclear'} = $cfg->{'autoclear'} || 0;
     $self->{'_opts'}->{'clearbefore'} = $cfg->{'clearbefore'} || 0;
     $self->{'_opts'}->{'clearafter'} = $cfg->{'clearafter'} || 0;
-    $self->{'_opts'}->{'beepbin'} = $cfg->{'beepbin'} || $self->_find_bin('beep') || '/usr/bin/beep';
     $self->{'_opts'}->{'beepbefore'} = $cfg->{'beepbefore'} || 0;
     $self->{'_opts'}->{'beepafter'} = $cfg->{'beepafter'} || 0;
-    unless (-x $self->{'_opts'}->{'bin'}) {
-		croak("the dialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
-    }
     $self->{'_opts'}->{'DIALOGRC'} = $cfg->{'DIALOGRC'} || undef();
     my $beginref = $cfg->{'begin'};
     $self->{'_opts'}->{'begin'} = (ref($beginref) eq "ARRAY") ? $beginref : undef();
-    $self->{'_opts'}->{'cancel-label'} = $cfg->{'cancel-label'} || undef();
     $self->{'_opts'}->{'defaultno'} = $cfg->{'defaultno'} || 0;
     $self->{'_opts'}->{'default-item'} = $cfg->{'default-item'} || undef();
-    $self->{'_opts'}->{'exit-label'} = $cfg->{'exit-label'} || undef();
     $self->{'_opts'}->{'extra-button'} = $cfg->{'extra-button'} || 0;
-    $self->{'_opts'}->{'extra-label'} = $cfg->{'extra-label'} || undef();
     $self->{'_opts'}->{'help-button'} = $cfg->{'help-button'} || 0;
-    $self->{'_opts'}->{'help-label'} = $cfg->{'help-label'} || undef();
     $self->{'_opts'}->{'max-input'} = $cfg->{'max-input'} || 0;
     $self->{'_opts'}->{'no-cancel'} = $cfg->{'no-cancel'} || $cfg->{'nocancel'} || 0;
     $self->{'_opts'}->{'no-collapse'} = $cfg->{'no-collapse'} || 0;
     $self->{'_opts'}->{'no-shadow'} = $cfg->{'no-shadow'} || 0;
-    $self->{'_opts'}->{'ok-label'} = $cfg->{'ok-label'} || undef();
     $self->{'_opts'}->{'shadow'} = $cfg->{'shadow'} || 0;
     $self->{'_opts'}->{'tab-correct'} = $cfg->{'tab-correct'} || 0;
     $self->{'_opts'}->{'tab-len'} = $cfg->{'tab-len'} || 0;
     $self->{'_opts'}->{'listheight'} = $cfg->{'listheight'} || $cfg->{'menuheight'} || 5;
     $self->{'_opts'}->{'formheight'} = $cfg->{'formheight'} || $cfg->{'listheight'} || 5;
-    $self->{'_opts'}->{'yes-label'} = $cfg->{'yes-label'} || undef();
-    $self->{'_opts'}->{'no-label'} = $cfg->{'no-label'} || undef();
 
     $self->_determine_dialog_variant();
     return($self);
