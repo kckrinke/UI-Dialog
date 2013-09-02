@@ -40,6 +40,7 @@ PROVIDES
  UI::Dialog::Backend::GDialog
  UI::Dialog::Backend::KDialog
  UI::Dialog::Backend::Nautilus
+ UI::Dialog::Backend::NotifySend
  UI::Dialog::Backend::Whiptail
  UI::Dialog::Backend::XDialog
  UI::Dialog::Backend::XOSD
