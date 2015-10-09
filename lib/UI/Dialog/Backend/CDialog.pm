@@ -100,6 +100,8 @@ sub new {
     $self->{'_opts'}->{'yes-label'} = $cfg->{'yes-label'} || undef();
     $self->{'_opts'}->{'no-label'} = $cfg->{'no-label'} || undef();
 
+    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+
     $self->_determine_dialog_variant();
     return($self);
 }

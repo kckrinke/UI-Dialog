@@ -499,9 +499,10 @@ sub _merge_attrs {
 					$list->[$i] = $self->_esc_text($list->[$i]);
 				}
 			}
-		} else {
-			$args->{'list'} = $self->_esc_text($args->{'list'});
-		}
+    } else {
+      # This isn't an array, how did we get here? Programmer error?
+      $args->{'list'} = $self->_esc_text($list);
+    }
     }
     $args->{'clear'} = $args->{'clearbefore'} || $args->{'clearafter'} || $args->{'autoclear'} || 0;
     $args->{'beep'} = $args->{'beepbefore'} || $args->{'beepafter'} || $args->{'autobeep'} || 0;
@@ -535,17 +536,23 @@ sub _esc_text {
     my $self = $_[0];
     my $text = $_[1];
     unless (ref($text)) {
-		$text =~ s!\"!\\"!gm;
-		$text =~ s!\`!\\`!gm;
-		$text =~ s!\(!\(!gm;
-		$text =~ s!\)!\)!gm;
-		$text =~ s!\[!\[!gm;
-		$text =~ s!\]!\]!gm;
-		$text =~ s!\{!\{!gm;
-		$text =~ s!\}!\}!gm;
-		$text =~ s!\$!\\\$!gm;
-		$text =~ s!\>!\>!gm;
-		$text =~ s!\<!\<!gm;
+      if ($self->{'_opts'}->{'trust-input'} != 0) {
+        $text =~ s!`!\`!gm;
+        $text =~ s!\$!\$!gm;
+      } else {
+        # untrusted input, replace ` with ' and drop the $ from $()
+        $text =~ s!`!\'!gm;
+        $text =~ s!\$\(!\(!gm;
+      }
+      $text =~ s!"!\"!gm;
+      $text =~ s!\(!\(!gm;
+      $text =~ s!\)!\)!gm;
+      $text =~ s!\[!\[!gm;
+      $text =~ s!\]!\]!gm;
+      $text =~ s!\{!\{!gm;
+      $text =~ s!\}!\}!gm;
+      $text =~ s!>!\>!gm;
+      $text =~ s!<!\<!gm;
     }
     return($text);
 }

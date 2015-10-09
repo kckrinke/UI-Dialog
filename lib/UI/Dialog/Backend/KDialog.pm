@@ -71,6 +71,9 @@ sub new {
     unless (-x $self->{'_opts'}->{'bin'}) {
 		croak("the kdialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
     }
+
+    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+
     return($self);
 }
 
