@@ -25,7 +25,7 @@ use Time::HiRes qw( sleep );
 BEGIN {
     use vars qw( $VERSION @ISA );
     @ISA = qw( UI::Dialog::Backend );
-    $VERSION = '1.10';
+    $VERSION = '1.11';
 }
 
 $| = 1;							# turn on autoflush
