@@ -462,19 +462,21 @@ sub _merge_attrs {
     my $self = shift();
     my $args = (@_ % 2) ? { @_, '_odd' } : { @_ };
     my $defs = $self->{'_opts'};
+
     foreach my $def (keys(%$defs)) {
-		$args->{$def} = $defs->{$def} unless $args->{$def};
+      $args->{$def} = $defs->{$def} unless $args->{$def};
     }
+
     # alias 'filename' and 'file' to path
     $args->{'path'} = (($args->{'filename'}) ? $args->{'filename'} :
 					   ($args->{'file'}) ? $args->{'file'} :
 					   ($args->{'path'}) ? $args->{'path'} : "");
 
     if ($args->{'title'} && length($args->{'title'})) {
-		$args->{'title'} = $self->_esc_text($args->{'title'});
+    $args->{'title'} = $self->_esc_text($args->{'title'},$args->{'trust-input'});
     }
     if ($args->{'backtitle'} && length($args->{'backtitle'})) {
-		$args->{'backtitle'} = $self->_esc_text($args->{'backtitle'});
+    $args->{'backtitle'} = $self->_esc_text($args->{'backtitle'},$args->{'trust-input'});
     }
 	#     if ($args->{'text'} && length($args->{'text'})) {
 	# 	my $text = $args->{'text'};
@@ -493,15 +495,15 @@ sub _merge_attrs {
 				if (ref($elem) eq "ARRAY") {
 					my $elem_total = @{$elem};
 					for (my $j = 0; $j < $elem_total; $j++) {
-						$elem->[$j] = $self->_esc_text($elem->[$j]);
+            $elem->[$j] = $self->_esc_text($elem->[$j],$args->{'trust-input'});
 					}
 				} else {
-					$list->[$i] = $self->_esc_text($list->[$i]);
+          $list->[$i] = $self->_esc_text($list->[$i],$args->{'trust-input'});
 				}
 			}
     } else {
       # This isn't an array, how did we get here? Programmer error?
-      $args->{'list'} = $self->_esc_text($list);
+      $args->{'list'} = $self->_esc_text($list,$args->{'trust-input'});
     }
     }
     $args->{'clear'} = $args->{'clearbefore'} || $args->{'clearafter'} || $args->{'autoclear'} || 0;
@@ -535,8 +537,9 @@ sub _strip_text {
 sub _esc_text {
     my $self = $_[0];
     my $text = $_[1];
+    my $trust_input = @_==3 ? $_[2] : $self->{'_opts'}->{'trust-input'};
     unless (ref($text)) {
-      if ($self->{'_opts'}->{'trust-input'} != 0) {
+      if ($trust_input == 1) {
         $text =~ s!`!\`!gm;
         $text =~ s!\$!\$!gm;
       } else {
