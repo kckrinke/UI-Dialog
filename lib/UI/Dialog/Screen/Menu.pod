@@ -440,6 +440,7 @@ screen, the will return to the first which will itself continue to loop.
  UI::Dialog::GNOME
  UI::Dialog::KDE
  UI::Dialog::Console
+ UI::Dialog::Screen::Druid
  UI::Dialog::Backend
  UI::Dialog::Backend::ASCII
  UI::Dialog::Backend::CDialog
