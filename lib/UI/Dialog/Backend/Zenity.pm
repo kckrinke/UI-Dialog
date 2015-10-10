@@ -128,19 +128,19 @@ sub _mk_cmnd {
     return($cmnd);
 }
 sub _is_bad_version {
-    my $self = shift();
-    my ($d_maj, $d_min, $d_mac) = ( 1, 4, 0 );
-    my ($z_maj, $z_min, $z_mac) = ( 0, 0, 0 );
-    my $zenity_version = $self->{'ZENITY_VERSION'} || '0.0.0';
-    if ( $zenity_version =~ m!^(\d+)\.(\d+)\.(\d+)$! ) {
-        ($z_maj, $z_min, $z_mac) = ( $1, $2, $3 );
-    }
-    if ( ( $d_maj <  $z_maj                                        ) ||
-         ( $d_maj == $z_maj && $d_min <  $z_min                    ) ||
-         ( $d_maj == $z_maj && $d_min == $z_min && $d_mac < $z_mac )
-       ) {
-        return(0);
-    }
+    # my $self = shift();
+    # my ($d_maj, $d_min, $d_mac) = ( 1, 4, 0 );
+    # my ($z_maj, $z_min, $z_mac) = ( 0, 0, 0 );
+    # my $zenity_version = $self->{'ZENITY_VERSION'} || '0.0.0';
+    # if ( $zenity_version =~ m!^(\d+)\.(\d+)\.(\d+)$! ) {
+    #     ($z_maj, $z_min, $z_mac) = ( $1, $2, $3 );
+    # }
+    # if ( ( $d_maj <  $z_maj                                        ) ||
+    #      ( $d_maj == $z_maj && $d_min <  $z_min                    ) ||
+    #      ( $d_maj == $z_maj && $d_min == $z_min && $d_mac < $z_mac )
+    #    ) {
+    #     return(0);
+    # }
     return(1);
 }
 
@@ -167,7 +167,7 @@ sub command_string {
     my $text;
     if ($self->_is_bad_version()) {
 		#we should ignore STDERR...
-		chomp($text = `$cmnd`);
+    chomp($text = `$cmnd 2> /dev/null`);
     } else {
 		chomp($text = `$cmnd 2>&1`);
     }
@@ -185,7 +185,7 @@ sub command_array {
     my $text;
     if ($self->_is_bad_version()) {
 		#we should ignore STDERR...
-		chomp($text = `$cmnd`);
+    chomp($text = `$cmnd 2> /dev/null`);
     } else {
 		chomp($text = `$cmnd 2>&1`);
     }
