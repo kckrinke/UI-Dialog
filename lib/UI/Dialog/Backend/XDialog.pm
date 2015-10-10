@@ -164,7 +164,10 @@ sub new {
     $self->{'_opts'}->{'timeout'} = $cfg->{'timeout'} || 0;
     $self->{'_opts'}->{'wait'} = $cfg->{'wait'} || 0;
 
-    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     return($self);
 }

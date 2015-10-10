@@ -74,7 +74,10 @@ sub new {
 		croak("the zenity binary could not be found at: ".$self->{'_opts'}->{'bin'});
     }
 
-    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     my $command = $self->{'_opts'}->{'bin'}." --version";
     my $version = `$command 2>&1`;

@@ -69,7 +69,10 @@ sub new {
     $self->{'_opts'}->{'category'} = $self->cfg_escape($cfg->{'category'});
     $self->{'_opts'}->{'hint'} = $self->cfg_escape($cfg->{'hint'});
 
-    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     return($self);
 }

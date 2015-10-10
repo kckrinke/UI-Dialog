@@ -68,7 +68,10 @@ sub new {
     $self->_debug("ENV->UI_DIALOG: ".($ENV{'UI_DIALOG'}||'NULL'),2);
     unshift(@{$cfg->{'order'}},$ENV{'UI_DIALOG'}) if $ENV{'UI_DIALOG'};
 
-    $cfg->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+    $cfg->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     my @opts = ();
     foreach my $opt (keys(%$cfg)) { push(@opts,$opt,$cfg->{$opt}); }

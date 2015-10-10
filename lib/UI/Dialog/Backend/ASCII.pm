@@ -78,7 +78,10 @@ sub new {
 									$self->_find_bin('more')  );
     $self->{'_opts'}->{'stty'} = $cfg->{'stty'} || $self->_find_bin('stty');
 
-    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     $self->{'_state'} = {'rv'=>0};
 

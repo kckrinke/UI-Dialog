@@ -76,7 +76,10 @@ sub new {
 		croak("the osd_cat binary could not be found at: ".$self->{'_opts'}->{'bin'});
     }
 
-    $self->{'_opts'}->{'trust-input'} = ($cfg->{'trust-input'}==1) ? 1 : 0;
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     return($self);
 }
