@@ -33,7 +33,7 @@ sub new {
           PATH => (defined $args{PATH}) ? $args{PATH} : undef,
           beepbefore => (defined $args{beepbefore}) ? $args{beepbefore} : undef,
           beepafter => (defined $args{beepafter}) ? $args{beepafter} : undef,
-          'trust-input' = ($args{'trust-input'}==1) ? 1 : 0,
+          'trust-input' => ($args{'trust-input'}==1) ? 1 : 0,
          );
     }
     unless (exists $args{menu}) {
