@@ -49,6 +49,7 @@ PROVIDES
  UI::Dialog::GNOME
  UI::Dialog::KDE
  UI::Dialog::Screen::Menu
+ UI::Dialog::Screen::Druid
 
 COPYRIGHT AND LICENCE
 
