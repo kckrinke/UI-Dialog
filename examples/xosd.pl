@@ -5,12 +5,12 @@ use diagnostics;
 use UI::Dialog::Backend::XOSD;
 
 my @opts = ( debug => 3,
-             font => "lucidasans-bold-24",
-             #	font => "-*-fixed-*-*-*-*-20-*-*-*-*-*-iso8859-*",
-             delay => 2,
-             colour => "green",
-             pos => "middle",
-             align => "center" );
+			 font => "lucidasans-bold-24",
+			 #	font => "-*-fixed-*-*-*-*-20-*-*-*-*-*-iso8859-*",
+			 delay => 2,
+			 colour => "green",
+			 pos => "middle",
+			 align => "center" );
 
 my $d = new UI::Dialog::Backend::XOSD ( @opts );
 
