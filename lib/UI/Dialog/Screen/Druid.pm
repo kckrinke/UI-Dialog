@@ -23,23 +23,23 @@ use UI::Dialog;
 #
 
 sub new {
-    my ($class, %args) = @_;
-    unless (exists $args{dialog}) {
-      $args{dialog} = new UI::Dialog
-         (
-          title => (defined $args{title}) ? $args{title} : '',
-          backtitle => (defined $args{backtitle}) ? $args{backtitle} : '',
-          height => (defined $args{height}) ? $args{height} : 20,
-          width => (defined $args{width}) ? $args{width} : 65,
-          listheight => (defined $args{listheight}) ? $args{listheight} : 5,
-          order => (defined $args{order}) ? $args{order} : undef,
-          PATH => (defined $args{PATH}) ? $args{PATH} : undef,
-          beepbefore => (defined $args{beepbefore}) ? $args{beepbefore} : undef,
-          beepafter => (defined $args{beepafter}) ? $args{beepafter} : undef,
-         );
-    }
-    $args{performance} = [] unless exists $args{performance};
-    return bless { %args }, $class;
+  my ($class, %args) = @_;
+  unless (exists $args{dialog}) {
+    $args{dialog} = new UI::Dialog
+      (
+       title => (defined $args{title}) ? $args{title} : '',
+       backtitle => (defined $args{backtitle}) ? $args{backtitle} : '',
+       height => (defined $args{height}) ? $args{height} : 20,
+       width => (defined $args{width}) ? $args{width} : 65,
+       listheight => (defined $args{listheight}) ? $args{listheight} : 5,
+       order => (defined $args{order}) ? $args{order} : undef,
+       PATH => (defined $args{PATH}) ? $args{PATH} : undef,
+       beepbefore => (defined $args{beepbefore}) ? $args{beepbefore} : undef,
+       beepafter => (defined $args{beepafter}) ? $args{beepafter} : undef,
+      );
+  }
+  $args{performance} = [] unless exists $args{performance};
+  return bless { %args }, $class;
 }
 
 #: not used yet, not sure keys being forced unique isn't too rigid

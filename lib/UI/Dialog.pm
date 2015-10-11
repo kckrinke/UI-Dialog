@@ -21,8 +21,8 @@ use strict;
 use Carp;
 
 BEGIN {
-    use vars qw($VERSION);
-    $VERSION = '1.11';
+  use vars qw($VERSION);
+  $VERSION = '1.11';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -30,55 +30,69 @@ BEGIN {
 #:
 
 sub new {
-    my $proto = shift();
-    my $class = ref($proto) || $proto;
-    my $cfg = {@_} || {};
-    my $self = {};
-    bless($self, $class);
+  my $proto = shift();
+  my $class = ref($proto) || $proto;
+  my $cfg = {@_} || {};
+  my $self = {};
+  bless($self, $class);
 
-    $self->{'debug'} = $cfg->{'debug'} || 0;
+  $self->{'debug'} = $cfg->{'debug'} || 0;
 
 	#: Dynamic path discovery...
 	my $CFG_PATH = $cfg->{'PATH'};
 	if ($CFG_PATH) {
-		if (ref($CFG_PATH) eq "ARRAY") { $self->{'PATHS'} = $CFG_PATH; }
-		elsif ($CFG_PATH =~ m!:!) { $self->{'PATHS'} = [ split(/:/,$CFG_PATH) ]; }
-		elsif (-d $CFG_PATH) { $self->{'PATHS'} = [ $CFG_PATH ]; }
-	} elsif ($ENV{'PATH'}) { $self->{'PATHS'} = [ split(/:/,$ENV{'PATH'}) ]; }
-	else { $self->{'PATHS'} = ''; }
+		if (ref($CFG_PATH) eq "ARRAY") {
+      $self->{'PATHS'} = $CFG_PATH;
+    }
+		elsif ($CFG_PATH =~ m!:!) {
+      $self->{'PATHS'} = [ split(/:/,$CFG_PATH) ];
+    }
+		elsif (-d $CFG_PATH) {
+      $self->{'PATHS'} = [ $CFG_PATH ];
+    }
+	}
+  elsif ($ENV{'PATH'}) {
+    $self->{'PATHS'} = [ split(/:/,$ENV{'PATH'}) ];
+  }
+	else {
+    $self->{'PATHS'} = '';
+  }
 
-    if (not $cfg->{'order'} and ($ENV{'DISPLAY'} && length($ENV{'DISPLAY'}) > 0)) {
+  if (not $cfg->{'order'} and ($ENV{'DISPLAY'} && length($ENV{'DISPLAY'}) > 0)) {
 		#: Pick a GUI mode 'cause a DISPLAY was detected
 		if ($ENV{'TERM'} =~ /^dumb$/i) {
 			# we're running free of a terminal
 			$cfg->{'order'} = [ 'zenity', 'xdialog', 'gdialog', 'kdialog' ];
-		} else {
-			# we're running in a terminal
-            $cfg->{'order'} = [ 'zenity', 'xdialog', 'gdialog', 'kdialog', 'whiptail', 'cdialog', 'ascii' ];
 		}
-    }
-    # verify and repair the order
-    $cfg->{'order'} = ((ref($cfg->{'order'}) eq "ARRAY") ? $cfg->{'order'} :
-					   ($cfg->{'order'}) ? [ $cfg->{'order'} ] :
-					   [ 'cdialog', 'whiptail', 'ascii' ]);
+    else {
+			# we're running in a terminal
+      $cfg->{'order'} = [ 'zenity', 'xdialog', 'gdialog', 'kdialog', 'whiptail', 'cdialog', 'ascii' ];
+		}
+  }
+  # verify and repair the order
+  $cfg->{'order'} = ((ref($cfg->{'order'}) eq "ARRAY") ? $cfg->{'order'} :
+                     ($cfg->{'order'}) ? [ $cfg->{'order'} ] :
+                     [ 'cdialog', 'whiptail', 'ascii' ]);
 
-    $self->_debug("ENV->UI_DIALOGS: ".($ENV{'UI_DIALOGS'}||'NULL'),2);
-    $cfg->{'order'} = [ split(/\:/,$ENV{'UI_DIALOGS'}) ] if $ENV{'UI_DIALOGS'};
+  $self->_debug("ENV->UI_DIALOGS: ".($ENV{'UI_DIALOGS'}||'NULL'),2);
+  $cfg->{'order'} = [ split(/\:/,$ENV{'UI_DIALOGS'}) ] if $ENV{'UI_DIALOGS'};
 
-    $self->_debug("ENV->UI_DIALOG: ".($ENV{'UI_DIALOG'}||'NULL'),2);
-    unshift(@{$cfg->{'order'}},$ENV{'UI_DIALOG'}) if $ENV{'UI_DIALOG'};
+  $self->_debug("ENV->UI_DIALOG: ".($ENV{'UI_DIALOG'}||'NULL'),2);
+  unshift(@{$cfg->{'order'}},$ENV{'UI_DIALOG'}) if $ENV{'UI_DIALOG'};
 
-    $cfg->{'trust-input'} =
-      ( exists $cfg->{'trust-input'}
-        && $cfg->{'trust-input'}==1
-      ) ? 1 : 0;
+  $cfg->{'trust-input'} =
+    ( exists $cfg->{'trust-input'}
+      && $cfg->{'trust-input'}==1
+    ) ? 1 : 0;
 
-    my @opts = ();
-    foreach my $opt (keys(%$cfg)) { push(@opts,$opt,$cfg->{$opt}); }
+  my @opts = ();
+  foreach my $opt (keys(%$cfg)) {
+    push(@opts,$opt,$cfg->{$opt});
+  }
 
-    $self->_debug("order: @{$cfg->{'order'}}",2);
+  $self->_debug("order: @{$cfg->{'order'}}",2);
 
-    if (ref($cfg->{'order'}) eq "ARRAY") {
+  if (ref($cfg->{'order'}) eq "ARRAY") {
 		foreach my $try (@{$cfg->{'order'}}) {
 			if ($try =~ /^zenity$/i) {
 				$self->_debug("trying zenity",2);
@@ -87,88 +101,132 @@ sub new {
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::Zenity (@opts);
 					$self->_debug("using zenity",2);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^(?:gdialog|gdialog\.real)$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^(?:gdialog|gdialog\.real)$/i) {
 				$self->_debug("trying gdialog",2);
 				#: In Debian, gdialog is now being diverted to gdialog.real as zenity is the gnome2 replacement
 				if (eval "require UI::Dialog::Backend::GDialog; 1" && ($self->_has_variant('gdialog.real') ||
-																	   $self->_has_variant('gdialog'))) {
+                                                               $self->_has_variant('gdialog'))) {
 					require UI::Dialog::Backend::GDialog;
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::GDialog (@opts);
 					$self->_debug("using gdialog ",2);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^(?:xdialog|X)$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^(?:xdialog|X)$/i) {
 				$self->_debug("trying xdialog",2);
 				if (eval "require UI::Dialog::Backend::XDialog; 1" && $self->_has_variant('Xdialog')) {
 					require UI::Dialog::Backend::XDialog;
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::XDialog (@opts,'XDIALOG_HIGH_DIALOG_COMPAT',1);
 					$self->_debug("using xdialog",2);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^kdialog$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^kdialog$/i) {
 				$self->_debug("trying kdialog",2);
 				if (eval "require UI::Dialog::Backend::KDialog; 1" && $self->_has_variant('kdialog')) {
 					require UI::Dialog::Backend::KDialog;
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::KDialog (@opts);
 					$self->_debug("using kdialog",2);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^GNOME$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^GNOME$/i) {
 				if (eval "require UI::Dialog::GNOME; 1") {
 					require UI::Dialog::GNOME;
 					$self->{'_ui_dialog'} = new UI::Dialog::GNOME (@opts);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^KDE$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^KDE$/i) {
 				if (eval "require UI::Dialog::KDE; 1") {
 					require UI::Dialog::KDE;
 					$self->{'_ui_dialog'} = new UI::Dialog::KDE (@opts);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^CONSOLE$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^CONSOLE$/i) {
 				if (eval "require UI::Dialog::Console; 1") {
 					require UI::Dialog::Console;
 					$self->{'_ui_dialog'} = new UI::Dialog::Console (@opts);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^(?:dialog|cdialog)$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^(?:dialog|cdialog)$/i) {
 				$self->_debug("trying cdialog",2);
 				if (eval "require UI::Dialog::Backend::CDialog; 1" && $self->_has_variant('dialog')) {
 					require UI::Dialog::Backend::CDialog;
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::CDialog (@opts);
 					$self->_debug("using cdialog",2);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^whiptail$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^whiptail$/i) {
 				$self->_debug("trying whiptail",2);
 				if (eval "require UI::Dialog::Backend::Whiptail; 1" && $self->_has_variant('whiptail')) {
 					require UI::Dialog::Backend::Whiptail;
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::Whiptail (@opts);
 					$self->_debug("using whiptail",2);
 					last;
-				} else { next; }
-			} elsif ($try =~ /^(?:ascii|native)$/i) {
+				}
+        else {
+          next;
+        }
+			}
+      elsif ($try =~ /^(?:ascii|native)$/i) {
 				$self->_debug("trying ascii",2);
 				if (eval "require UI::Dialog::Backend::ASCII; 1") {
 					require UI::Dialog::Backend::ASCII;
 					$self->{'_ui_dialog'} = new UI::Dialog::Backend::ASCII (@opts);
 					$self->_debug("using ascii",2);
 					last;
-				} else { next; }
-			} else { next; }
+				}
+        else {
+          next;
+        }
+			}
+      else {
+        next;
+      }
 		}
-    } else {
+  }
+  else {
 		if (eval "require UI::Dialog::Backend::ASCII; 1") {
 			require UI::Dialog::Backend::ASCII;
 			$self->{'_ui_dialog'} = new UI::Dialog::Backend::ASCII (@opts);
-		} else {
+		}
+    else {
 			carp("Failed to load any suitable dialog variant backend.");
 		}
-    }
+  }
 
-    ref($self->{'_ui_dialog'}) or croak("unable to load suitable backend.");
-    return($self);
+  ref($self->{'_ui_dialog'}) or croak("unable to load suitable backend.");
+  return($self);
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -177,25 +235,25 @@ sub new {
 
 #: purely internal usage
 sub _debug {
-    my $self = $_[0];
-    my $mesg = $_[1] || 'null error message given!';
-    my $rate = $_[2] || 1;
-    return() unless $self->{'debug'} and $self->{'debug'} >= $rate;
-    chomp($mesg);
-    print STDERR "Debug: ".$mesg."\n";
+  my $self = $_[0];
+  my $mesg = $_[1] || 'null error message given!';
+  my $rate = $_[2] || 1;
+  return() unless $self->{'debug'} and $self->{'debug'} >= $rate;
+  chomp($mesg);
+  print STDERR "Debug: ".$mesg."\n";
 }
 
 sub _has_variant {
-    my $self = $_[0];
-    my $variant = $_[1];
-    $self->{'PATHS'} = ((ref($self->{'PATHS'}) eq "ARRAY") ? $self->{'PATHS'} :
-						($self->{'PATHS'}) ? [ $self->{'PATHS'} ] :
-						[ '/bin', '/usr/bin', '/usr/local/bin', '/opt/bin' ]);
-    foreach my $PATH (@{$self->{'PATHS'}}) {
+  my $self = $_[0];
+  my $variant = $_[1];
+  $self->{'PATHS'} = ((ref($self->{'PATHS'}) eq "ARRAY") ? $self->{'PATHS'} :
+                      ($self->{'PATHS'}) ? [ $self->{'PATHS'} ] :
+                      [ '/bin', '/usr/bin', '/usr/local/bin', '/opt/bin' ]);
+  foreach my $PATH (@{$self->{'PATHS'}}) {
 		return($PATH . '/' . $variant)
-		 unless not -x $PATH . '/' . $variant;
-    }
-    return(0);
+      unless not -x $PATH . '/' . $variant;
+  }
+  return(0);
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

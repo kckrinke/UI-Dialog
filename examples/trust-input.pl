@@ -6,9 +6,9 @@ my $d = new UI::Dialog
     height => 20, listheight => 5, debug => 1,
   );
 my @items =
- ( 1, 'Running `uname -o`',
-   2, 'Running $(uname -o)'
- );
+  ( 1, 'Running `uname -o`',
+    2, 'Running $(uname -o)'
+  );
 $d->menu
   ( text=>"The following menu items allow for commands in strings.",
     list=>\@items,
