@@ -180,20 +180,20 @@ sub make_kvt {
   my ($self,$args,$value) = @_;
   return
     {
-     literal => $args->{'literal'},
+     literal => ($args->{'literal'} || 0),
      width => ($args->{'width'}||'65'),
-     trust => $args->{'trust-input'},
-     value => $value
+     trust => ($args->{'trust-input'} || 0),
+     value => ($value || '')
     };
 }
 sub make_kvl {
   my ($self,$args,$value) = @_;
   return
     {
-     literal => 1, # don't organize
+     literal => 1,
      width => ($args->{'width'}||'65'),
-     trust => $args->{'trust-input'},
-     value => $value
+     trust => ($args->{'trust-input'} || 0),
+     value => ($value || '')
     };
 }
 
@@ -232,7 +232,7 @@ sub append_format_check {
 sub clean_format {
   my ($self,$trust,$sref) = @_;
   unless (ref($sref) eq "SCALAR") {
-    croak("Programmer error. clean_format requires a string-reference.");
+    die("Programmer error. clean_format requires a SCALAR ref, found: ".ref($sref));
   }
   $$sref =~ s!\x00!!mg; # remove nulls
   unless ($trust) {
@@ -253,13 +253,13 @@ sub prepare_command {
   my (%rpl_add) = @_;
   my %rpl = ();
   foreach my $key (keys %{$args}) {
-    $rpl{$key} = $self->make_kvl($args,$args->{$key});
+    $rpl{$key} = $self->make_kvl($args,$args->{$key}||'');
   }
   foreach my $key (keys %rpl_add) {
     $rpl{$key} = $rpl_add{$key};
   }
   foreach my $key (keys %rpl) {
-    my $value = $rpl{$key}->{value};
+    my $value = $rpl{$key}->{value}||'';
     if (ref($value) eq "ARRAY") {
       #: menu, checklist, radiolist...
       my $list = '';
@@ -287,24 +287,22 @@ sub prepare_command {
           }
         }
         # menu...
-        $self->clean_format
-          ( $rpl{$key}->{trust},
-            \$item
-          );
+        $self->clean_format( $rpl{$key}->{trust}, \$item );
         $list .= ' "'.$item.'"';
       }
       $format =~ s!\{\{\Q${key}\E\}\}!${list}!mg;
     }
     else {
-      unless ($rpl{$key}->{literal}==1) {
-        $value = $self->_organize_text
-          ( $value, $rpl{$key}->{width}, $args->{'trust-input'} );
+      $value ||= '' unless defined $value;
+      $value = "$1" if $value =~ m!^(\d+)$!;
+      if (ref(\$value) eq "SCALAR") {
+        unless ($rpl{$key}->{literal}==1) {
+          $value = $self->_organize_text
+            ( $value, $rpl{$key}->{width}, $rpl{$key}->{'trust'} );
+        }
+        $self->clean_format( $rpl{$key}->{'trust'}, \$value );
+        $format =~ s!\{\{\Q${key}\E\}\}!"${value}"!mg;
       }
-      $self->clean_format
-        ( $rpl{$key}->{trust},
-          \$value
-        );
-      $format =~ s!\{\{\Q${key}\E\}\}!"${value}"!mg;
     }
   }
   return $format;
@@ -731,63 +729,63 @@ sub _strip_text {
   return($text);
 }
 
-#: indent and organize the text argument
-sub _organize_text {
-  my $self = $_[0];
-  my $text = $_[1] || return();
-  my $width = $_[2] || 65;
-  my $trust = $_[3] || 0;
-  my @array;
+# #: indent and organize the text argument
+# sub _organize_text {
+#   my $self = $_[0];
+#   my $text = $_[1] || return();
+#   my $width = $_[2] || 65;
+#   my $trust = $_[3] || 0;
+#   my @array;
 
-  if (ref($text) eq "ARRAY") {
-    push(@array,@{$text});
-  }
-  elsif ($text =~ /\\n/) {
-    @array = split(/\\n/,$text);
-  }
-  else {
-    @array = split(/\n/,$text);
-  }
-  $text = undef();
+#   if (ref($text) eq "ARRAY") {
+#     push(@array,@{$text});
+#   }
+#   elsif ($text =~ /\\n/) {
+#     @array = split(/\\n/,$text);
+#   }
+#   else {
+#     @array = split(/\n/,$text);
+#   }
+#   $text = undef();
 
-  @array = $self->word_wrap($width,"","",@array);
+#   @array = $self->word_wrap($width,"","",@array);
 
-  if ($self->{'scale'}) {
-		foreach my $line (@array) {
-			my $s_line = $self->__TRANSLATE_CLEAN($line);
-			$s_line =~ s!\[A\=\w+\]!!gi;
-			$self->{'width'} = length($s_line) + 5
-        if ($self->{'width'} - 5) < length($s_line)
-			  && (length($s_line) <= $self->{'max-scale'});
-		}
-  }
-  foreach my $line (@array) {
-		my $pad;
-		my $s_line = $self->_strip_text($line);
-		if ($line =~ /\[A\=(\w+)\]/i) {
-			my $align = $1;
-			$line =~ s!\[A\=\w+\]!!gi;
-			if (uc($align) eq "CENTER" || uc($align) eq "C") {
-        $pad = (($self->{'_opts'}->{'width'} - length($s_line)) / 2);
-			}
-      elsif (uc($align) eq "LEFT" || uc($align) eq "L") {
-				$pad = 0;
-			}
-      elsif (uc($align) eq "RIGHT" || uc($align) eq "R") {
-        $pad = (($self->{'_opts'}->{'width'}) - length($s_line));
-			}
-		}
-		if ($pad) {
-      $text .= (" " x $pad).$line."\n";
-    }
-		else {
-      $text .= $line."\n";
-    }
-  }
-  $text = $self->_strip_text($text);
-  chomp($text);
-  return($text);
-}
+#   if ($self->{'scale'}) {
+# 		foreach my $line (@array) {
+# 			my $s_line = $self->__TRANSLATE_CLEAN($line);
+# 			$s_line =~ s!\[A\=\w+\]!!gi;
+# 			$self->{'width'} = length($s_line) + 5
+#         if ($self->{'width'} - 5) < length($s_line)
+# 			  && (length($s_line) <= $self->{'max-scale'});
+# 		}
+#   }
+#   foreach my $line (@array) {
+# 		my $pad;
+# 		my $s_line = $self->_strip_text($line);
+# 		if ($line =~ /\[A\=(\w+)\]/i) {
+# 			my $align = $1;
+# 			$line =~ s!\[A\=\w+\]!!gi;
+# 			if (uc($align) eq "CENTER" || uc($align) eq "C") {
+#         $pad = (($self->{'_opts'}->{'width'} - length($s_line)) / 2);
+# 			}
+#       elsif (uc($align) eq "LEFT" || uc($align) eq "L") {
+# 				$pad = 0;
+# 			}
+#       elsif (uc($align) eq "RIGHT" || uc($align) eq "R") {
+#         $pad = (($self->{'_opts'}->{'width'}) - length($s_line));
+# 			}
+# 		}
+# 		if ($pad) {
+#       $text .= (" " x $pad).$line."\n";
+#     }
+# 		else {
+#       $text .= $line."\n";
+#     }
+#   }
+#   $text = $self->_strip_text($text);
+#   chomp($text);
+#   return($text);
+# }
 
 #: is this a BSD system?
 sub _is_bsd {

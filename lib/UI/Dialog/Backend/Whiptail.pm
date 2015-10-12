@@ -271,6 +271,7 @@ sub msgbox {
     shift(); $caller = shift();
   }
   my $args = $self->_pre($caller,@_);
+  $args->{'msgbox'} ||= 'msgbox';
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
@@ -405,7 +406,7 @@ sub checklist {
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--separate-output');
-  if ($args->{radiolist} == 1) {
+  if (defined $args->{radiolist} && $args->{radiolist}) {
     $fmt = $self->append_format($fmt,'--radiolist');
   } else {
     $fmt = $self->append_format($fmt,'--checklist');
