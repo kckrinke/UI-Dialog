@@ -39,6 +39,8 @@ sub new {
   my $class = ref($proto) || $proto;
   my $cfg = ((ref($_[0]) eq "HASH") ? $_[0] : (@_) ? { @_ } : {});
   my $self = { '_opts' => $cfg };
+  $self->{'test_mode'} = $cfg->{'test_mode'} if exists $cfg->{'test_mode'};
+  $self->{'test_mode_result'} = '';
   bless($self, $class);
   return($self);
 }
@@ -313,10 +315,30 @@ sub prepare_command {
 #: Execution Methods
 #:
 
+sub is_unit_test_mode {
+  my ($self) = @_;
+  return 1
+    if ( exists $self->{'test_mode'}
+         &&
+         defined $self->{'test_mode'}
+         &&
+         $self->{'test_mode'}
+       );
+  return 0;
+}
+sub get_unit_test_result {
+  my ($self) = @_;
+  return $self->{'test_mode_result'};
+}
+
 #: execute a simple command (return the exit code only);
 sub command_state {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("command: ".$cmnd,1);
   system($cmnd . " 2>&1 > /dev/null");
   my $rv = $? >> 8;
@@ -328,6 +350,10 @@ sub command_state {
 sub command_string {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("command: ".$cmnd,1);
   chomp(my $text = `$cmnd 2>&1`);
   my $rv = $? >> 8;
@@ -340,6 +366,10 @@ sub command_string {
 sub command_array {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("command: ".$cmnd,1);
   chomp(my $text = `$cmnd 2>&1`);
   my $rv = $? >> 8;
