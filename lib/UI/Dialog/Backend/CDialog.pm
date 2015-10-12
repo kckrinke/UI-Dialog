@@ -756,9 +756,9 @@ sub calendar {
     shift(); $caller = shift();
   }
   my $args = $self->_pre($caller,@_);
-  $args->{'day'}   ||= '';
-  $args->{'month'} ||= '';
-  $args->{'year'}  ||= '';
+  $args->{'day'}   ||= '1';
+  $args->{'month'} ||= '1';
+  $args->{'year'}  ||= '1970';
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
