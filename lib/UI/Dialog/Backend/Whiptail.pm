@@ -89,6 +89,9 @@ sub new {
       && $cfg->{'trust-input'}==1
     ) ? 1 : 0;
 
+  $self->{'test_mode'} = $cfg->{'test_mode'} if exists $cfg->{'test_mode'};
+  $self->{'test_mode_result'} = '';
+
   return($self);
 }
 
@@ -121,6 +124,10 @@ sub append_format_base {
 sub command_state {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("".$cmnd);
   system($cmnd . " 2> /dev/null");
   return($? >> 8);
@@ -128,6 +135,10 @@ sub command_state {
 sub command_string {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug($cmnd);
   $self->gen_tempfile_name(); # don't accept the first result
   my $tmpfile = $self->gen_tempfile_name();
@@ -150,6 +161,10 @@ sub command_string {
 sub command_array {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug($cmnd);
   $self->gen_tempfile_name(); # don't accept the first result
   my $tmpfile = $self->gen_tempfile_name();
