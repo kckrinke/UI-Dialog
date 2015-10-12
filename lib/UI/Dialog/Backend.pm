@@ -49,6 +49,12 @@ sub new {
 #: Accessory Methods
 #:
 
+#: Return the path to the dialog variant binary
+sub get_bin {
+  return $_[0]->{'_opts'}{'bin'} if defined $_[0]->{'_opts'}{'bin'};
+  return undef;
+}
+
 #: Provide the API interface to nautilus
 sub nautilus {
   my $self = $_[0];
