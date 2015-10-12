@@ -266,12 +266,25 @@ sub prepare_command {
       foreach my $item (@{$value}) {
         if (ref($item) eq "ARRAY") {
           # checklist, radiolist...
-          $self->clean_format
-            ( $rpl{$key}->{trust},
-              \$item->[0]
-            );
-          $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'"';
-          next;
+          if (@{$item} == 2) {
+            $self->clean_format( $rpl{$key}->{trust}, \$item->[0] );
+            $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'"';
+            next;
+          }
+          elsif (@{$item} == 3) {
+            $self->clean_format( $rpl{$key}->{trust}, \$item->[0] );
+            $self->clean_format( $rpl{$key}->{trust}, \$item->[2] );
+            $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'" "'.($item->[2]||1).'"';
+            next;
+          }
+          elsif (@{$item} == 4) {
+            $self->clean_format( $rpl{$key}->{trust}, \$item->[0] );
+            $self->clean_format( $rpl{$key}->{trust}, \$item->[2] );
+            $self->clean_format( $rpl{$key}->{trust}, \$item->[3] );
+            $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'" "'.($item->[2]||1).'"';
+            $list .= ' "'.$item->[3].'"';
+            next;
+          }
         }
         # menu...
         $self->clean_format
