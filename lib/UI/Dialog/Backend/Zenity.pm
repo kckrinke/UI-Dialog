@@ -85,15 +85,15 @@ sub new {
 		croak("the zenity binary could not be found at: ".$self->{'_opts'}->{'bin'});
   }
 
-  $self->{'_opts'}->{'trust-input'} =
-    ( exists $cfg->{'trust-input'}
-      && $cfg->{'trust-input'}==1
-    ) ? 1 : 0;
+  $self->{'_opts'}->{'trust-input'} = $cfg->{'trust-input'} || 0;
 
   my $command = $self->{'_opts'}->{'bin'}." --version";
   my $version = `$command 2>&1`;
   chomp( $version );
   $self->{'ZENITY_VERSION'} = $version || '1';
+
+  $self->{'test_mode'} = $cfg->{'test_mode'} if exists $cfg->{'test_mode'};
+  $self->{'test_mode_result'} = '';
 
   return($self);
 }
@@ -122,7 +122,6 @@ sub append_format_base {
   $ENV{'ZENITY_EXTRA'}  = '3';
   $ENV{'ZENITY_HELP'}   = '2';
   $ENV{'ZENITY_OK'}     = '0';
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
   $fmt = $self->append_format_check($args,$fmt,'window-icon','--window-icon {{window-icon}}');
   $fmt = $self->append_format_check($args,$fmt,'width','--width {{width}}');
   $fmt = $self->append_format_check($args,$fmt,'height','--height {{height}}');
@@ -158,6 +157,10 @@ sub _is_bad_version {
 sub command_state {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("command: ".$cmnd,1);
   system($cmnd . "> /dev/null 2> /dev/null");
   my $rv = $? >> 8;
@@ -169,6 +172,10 @@ sub command_state {
 sub command_string {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("command: ".$cmnd,1);
   my $text;
   if ($self->_is_bad_version()) {
@@ -188,6 +195,10 @@ sub command_string {
 sub command_array {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("command: ".$cmnd,1);
   my $text;
   if ($self->_is_bad_version()) {
