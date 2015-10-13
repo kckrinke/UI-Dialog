@@ -174,7 +174,7 @@ sub command_string {
   my $cmnd = $_[1];
   if ($self->is_unit_test_mode()) {
     $self->{'test_mode_result'} = $cmnd;
-    return 0;
+    return (wantarray) ? (0,'') : '';
   }
   $self->_debug("command: ".$cmnd,1);
   my $text;
@@ -197,7 +197,7 @@ sub command_array {
   my $cmnd = $_[1];
   if ($self->is_unit_test_mode()) {
     $self->{'test_mode_result'} = $cmnd;
-    return 0;
+    return (wantarray) ? (0,[]) : [];
   }
   $self->_debug("command: ".$cmnd,1);
   my $text;
