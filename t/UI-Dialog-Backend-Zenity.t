@@ -58,7 +58,7 @@ is( $obj->get_unit_test_result(),
 $obj->textbox( title=>"TITLE", path => "$0",
                width => 64, height => 16 );
 is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --text-info --filename "t/UI-Dialog-Backend-Zenity.t"'
+    $bin.' --title "TITLE" --width "64" --height "16" --text-info --filename "'.$0.'"'
   );
 
 $obj->menu( title=>"TITLE", text => "TEXT",
