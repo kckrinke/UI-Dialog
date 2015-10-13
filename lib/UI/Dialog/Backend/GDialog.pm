@@ -82,10 +82,10 @@ sub new {
 		croak("the gdialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
   }
 
-  $self->{'_opts'}->{'trust-input'} =
-    ( exists $cfg->{'trust-input'}
-      && $cfg->{'trust-input'}==1
-    ) ? 1 : 0;
+  $self->{'_opts'}->{'trust-input'} = $cfg->{'trust-input'} || 0;
+
+  $self->{'test_mode'} = $cfg->{'test_mode'} if exists $cfg->{'test_mode'};
+  $self->{'test_mode_result'} = '';
 
   return($self);
 }
@@ -108,8 +108,6 @@ sub _del_gauge {
 
 sub append_format_base {
   my ($self,$args,$fmt) = @_;
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
-  $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
   return $fmt;
 }
 
@@ -293,6 +291,8 @@ sub menu {
   }
   my $args = $self->_pre($caller,@_);
 
+  $args->{'listheight'} ||= $args->{'menuheight'};
+
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--menu');
@@ -346,6 +346,7 @@ sub checklist {
   my $command = $self->prepare_command
     ( $args, $fmt,
       text => $self->make_kvt($args,$args->{'text'}),
+      listheight => $self->make_kvl($args,$args->{'listheight'})
     );
 
   my ($rv,$selected) = $self->command_array($command);
