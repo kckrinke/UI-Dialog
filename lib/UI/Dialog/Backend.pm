@@ -213,7 +213,6 @@ sub prepare_format {
   # start with our binary path
   my $fmt = $self->{'_opts'}{'bin'};
   $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
-  $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
   return $fmt;
 }
 
@@ -304,7 +303,7 @@ sub prepare_command {
       $value ||= '' unless defined $value;
       $value = "$1" if $value =~ m!^(\d+)$!;
       if (ref(\$value) eq "SCALAR") {
-        unless ($rpl{$key}->{literal}==1) {
+        unless ($rpl{$key}->{'trust'}||$rpl{$key}->{literal}) {
           $value = $self->_organize_text
             ( $value, $rpl{$key}->{width}, $rpl{$key}->{'trust'} );
         }
@@ -666,6 +665,7 @@ sub _organize_text {
   my $self = $_[0];
   my $text = $_[1];
   my $width = $_[2] || 65;
+  my $trust = (exists $_[3] && defined $_[3]) ? $_[3] : '0';
   $width -= 4; # take account of borders?
   my @array;
 
@@ -684,7 +684,7 @@ sub _organize_text {
 
   if ($self->{'scale'}) {
     foreach my $line (@array) {
-      my $s_line = $self->__TRANSLATE_CLEAN($line);
+      my $s_line = $line;#$self->__TRANSLATE_CLEAN($line);
       $s_line =~ s!\[A\=\w+\]!!gi;
       $self->{'width'} = length($s_line) + 5
         if ($self->{'width'} - 5) < length($s_line)
@@ -694,6 +694,7 @@ sub _organize_text {
 
   foreach my $line (@array) {
     my $pad;
+    $self->clean_format( $trust, \$line );
     my $s_line = $self->_strip_text($line);
     if ($line =~ /\[A\=(\w+)\]/i) {
       my $align = $1;
@@ -764,64 +765,6 @@ sub _strip_text {
   $text =~ s!\[/?[BURN]\]!!gmi;
   return($text);
 }
-
-# #: indent and organize the text argument
-# sub _organize_text {
-#   my $self = $_[0];
-#   my $text = $_[1] || return();
-#   my $width = $_[2] || 65;
-#   my $trust = $_[3] || 0;
-#   my @array;
-
-#   if (ref($text) eq "ARRAY") {
-#     push(@array,@{$text});
-#   }
-#   elsif ($text =~ /\\n/) {
-#     @array = split(/\\n/,$text);
-#   }
-#   else {
-#     @array = split(/\n/,$text);
-#   }
-#   $text = undef();
-
-#   @array = $self->word_wrap($width,"","",@array);
-
-#   if ($self->{'scale'}) {
-# 		foreach my $line (@array) {
-# 			my $s_line = $self->__TRANSLATE_CLEAN($line);
-# 			$s_line =~ s!\[A\=\w+\]!!gi;
-# 			$self->{'width'} = length($s_line) + 5
-#         if ($self->{'width'} - 5) < length($s_line)
-# 			  && (length($s_line) <= $self->{'max-scale'});
-# 		}
-#   }
-#   foreach my $line (@array) {
-# 		my $pad;
-# 		my $s_line = $self->_strip_text($line);
-# 		if ($line =~ /\[A\=(\w+)\]/i) {
-# 			my $align = $1;
-# 			$line =~ s!\[A\=\w+\]!!gi;
-# 			if (uc($align) eq "CENTER" || uc($align) eq "C") {
-#         $pad = (($self->{'_opts'}->{'width'} - length($s_line)) / 2);
-# 			}
-#       elsif (uc($align) eq "LEFT" || uc($align) eq "L") {
-# 				$pad = 0;
-# 			}
-#       elsif (uc($align) eq "RIGHT" || uc($align) eq "R") {
-#         $pad = (($self->{'_opts'}->{'width'}) - length($s_line));
-# 			}
-# 		}
-# 		if ($pad) {
-#       $text .= (" " x $pad).$line."\n";
-#     }
-# 		else {
-#       $text .= $line."\n";
-#     }
-#   }
-#   $text = $self->_strip_text($text);
-#   chomp($text);
-#   return($text);
-# }
 
 #: is this a BSD system?
 sub _is_bsd {

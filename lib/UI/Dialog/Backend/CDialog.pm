@@ -111,12 +111,13 @@ sub new {
   $self->{'_opts'}->{'yes-label'} = $cfg->{'yes-label'} || undef();
   $self->{'_opts'}->{'no-label'} = $cfg->{'no-label'} || undef();
 
-  $self->{'_opts'}->{'trust-input'} =
-    ( exists $cfg->{'trust-input'}
-      && $cfg->{'trust-input'}==1
-    ) ? 1 : 0;
+  $self->{'_opts'}->{'trust-input'} = $cfg->{'trust-input'} || 0;
 
   $self->_determine_dialog_variant();
+
+  $self->{'test_mode'} = $cfg->{'test_mode'} if exists $cfg->{'test_mode'};
+  $self->{'test_mode_result'} = '';
+
   return($self);
 }
 
@@ -174,7 +175,6 @@ sub append_format_base {
   $ENV{'DIALOG_EXTRA'}  = '3';
   $ENV{'DIALOG_HELP'}   = '2';
   $ENV{'DIALOG_OK'}     = '0';
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
   $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
   $fmt = $self->append_format_check($args,$fmt,"defaultno","--defaultno");
   $fmt = $self->append_format_check($args,$fmt,"extra-button","--extra-button");
@@ -219,6 +219,10 @@ sub append_format_base {
 sub command_state {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug("".$cmnd);
   my $null_dev = $^O =~ /win32/i ? 'NUL:' : '/dev/null';
   system($cmnd . " 2> $null_dev");
@@ -227,6 +231,10 @@ sub command_state {
 sub command_string {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug($cmnd);
   $self->gen_tempfile_name(); # don't accept the first result
   my $tmpfile = $self->gen_tempfile_name();
@@ -249,6 +257,10 @@ sub command_string {
 sub command_array {
   my $self = $_[0];
   my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return 0;
+  }
   $self->_debug($cmnd);
   $self->gen_tempfile_name(); # don't accept the first result
   my $tmpfile = $self->gen_tempfile_name();
@@ -282,7 +294,7 @@ sub _organize_text {
   my $self = $_[0];
   my $text = $_[1] || return();
   my $width = $_[2] || 65;
-  my $trust = $_[3] || 0;
+  my $trust = (exists $_[3] && defined $_[3]) ? $_[3] : '0';
   my @array;
 
   if (ref($text) eq "ARRAY") {
@@ -304,7 +316,7 @@ sub _organize_text {
 
   if ($self->{'scale'}) {
 		foreach my $line (@array) {
-			my $s_line = $self->__TRANSLATE_CLEAN($line);
+      my $s_line = $line; #$self->__TRANSLATE_CLEAN($line);
 			$s_line =~ s!\[A\=\w+\]!!gi;
 			$self->{'width'} = length($s_line) + 5
         if ($self->{'width'} - 5) < length($s_line)
@@ -315,7 +327,7 @@ sub _organize_text {
   my $new_line = $^O =~ /win32/i ? '\n' : "\n";
   foreach my $line (@array) {
 		my $pad;
-		my $s_line = $self->_strip_text($line);
+    my $s_line = $self->_strip_text($line);
 		if ($line =~ /\[A\=(\w+)\]/i) {
 			my $align = $1;
 			$line =~ s!\[A\=\w+\]!!gi;
@@ -332,12 +344,13 @@ sub _organize_text {
 			}
 		}
 		if ($pad) {
-      $text .= (" " x $pad).$line.$new_line;
+      $text .= (" " x $pad).$new_line;
     }
 		else {
       $text .= $line . $new_line;
     }
   }
+  chomp($text);
   return($self->_filter_text($text));
 }
 sub _strip_text {
@@ -467,8 +480,7 @@ sub inputbox {
   my $args = $self->_pre($caller,@_);
 
   my $fmt = $self->prepare_format($args);
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
-  $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
+  $fmt = $self->append_format_base($args,$fmt);
   if ($args->{'password'}) {
     $fmt = $self->append_format($fmt,'--passwordbox');
   }
@@ -519,8 +531,7 @@ sub msgbox {
   $args->{'msgbox'} ||= 'msgbox';
 
   my $fmt = $self->prepare_format($args);
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
-  $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
+  $fmt = $self->append_format_base($args,$fmt);
   if ($args->{'infobox'}) {
     $fmt = $self->append_format($fmt,'--infobox');
   }
