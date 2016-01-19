@@ -1,6 +1,6 @@
 package UI::Dialog::Backend::NotifySend;
 ###############################################################################
-#  Copyright (C) 2013  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@ use FileHandle;
 BEGIN {
     use vars qw( $VERSION @ISA );
     @ISA = qw( UI::Dialog::Backend );
-    $VERSION = '1.10';
+    $VERSION = '1.11';
 }
 
 sub new {
@@ -68,6 +68,11 @@ sub new {
     $self->{'_opts'}->{'icon'} = $self->cfg_escape($cfg->{'icon'});
     $self->{'_opts'}->{'category'} = $self->cfg_escape($cfg->{'category'});
     $self->{'_opts'}->{'hint'} = $self->cfg_escape($cfg->{'hint'});
+
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     return($self);
 }

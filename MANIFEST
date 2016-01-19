@@ -9,7 +9,9 @@ examples/gnome.pl
 examples/kde.pl
 examples/kdialog.pl
 examples/nautilus.pl
+examples/screen-druid.pl
 examples/screen-menu.pl
+examples/trust-input.pl
 examples/ui-dialog.pl
 examples/whiptail.pl
 examples/xdialog.pl
@@ -48,6 +50,8 @@ lib/UI/Dialog/GNOME.pm
 lib/UI/Dialog/GNOME.pod
 lib/UI/Dialog/KDE.pm
 lib/UI/Dialog/KDE.pod
+lib/UI/Dialog/Screen/Druid.pm
+lib/UI/Dialog/Screen/Druid.pod
 lib/UI/Dialog/Screen/Menu.pm
 lib/UI/Dialog/Screen/Menu.pod
 Makefile.PL
@@ -67,6 +71,7 @@ t/UI-Dialog-Console.t
 t/UI-Dialog-Gauged.t
 t/UI-Dialog-GNOME.t
 t/UI-Dialog-KDE.t
+t/UI-Dialog-Screen-Druid.t
 t/UI-Dialog-Screen-Menu.t
 t/UI-Dialog.t
 TODO

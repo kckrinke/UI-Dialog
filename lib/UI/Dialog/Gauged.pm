@@ -1,6 +1,6 @@
 package UI::Dialog::Gauged;
 ###############################################################################
-#  Copyright (C) 2013  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@ use Carp;
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION = '1.10';
+    $VERSION = '1.11';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -67,6 +67,11 @@ sub new {
 
     $self->_debug("ENV->UI_DIALOG: ".($ENV{'UI_DIALOG'}||'NULL'),2);
     unshift(@{$cfg->{'order'}},$ENV{'UI_DIALOG'}) if $ENV{'UI_DIALOG'};
+
+    $cfg->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
 
     my @opts = ();
     foreach my $opt (keys(%$cfg)) { push(@opts,$opt,$cfg->{$opt}); }

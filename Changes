@@ -1,3 +1,22 @@
+1.11 - Sat, 10 Oct 2015 16:20:42 -0500
+
+ * New 'trust-input' option implemented. CVE-2008-7315
+ * all new class, UI::Dialog::Screen::Druid. See examples/screen-druid.pl for usage. Has pod too.
+ * added copyright notice to UI::Dialog::Screen::Menu
+ * fix an issue with Zenity and a noisy stderr getting into the user input. zenity backend now ignores stderr for all subcommands
+ * more reliable checking/defaulting for trust-input option
+ * bugfix, hash assign, not regular =
+ * bugfix, semi-colon needed to be a comma.
+ * version bump to 1.11
+ * added Matthijs to contributors (bugreport) and updated Changes
+ * copyright date bumped to 2015
+ * updated documentation to reflect trust-input feature
+ * an example script for trust-input feature
+ * trust-input can now be set on a per-command basis, not just on module construction.
+ * feature "trust-input" - Addresses CVE-2008-7315
+
+ -- Kevin C. Krinke <kevin@krinke.ca>
+
 1.10 - Sun, 01 Sep 2013 21:12:22 -0500
 
   * Input and arguments now escaped "more". Not sure it's "secure", but it's definitely better.

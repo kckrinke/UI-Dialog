@@ -113,6 +113,8 @@ decided during object creation.
 
 =item B<listheight = \d+> (5) *
 
+=item B<trust-input = 0,1> (0) *
+
 =back
 
 =back
@@ -601,6 +603,22 @@ a SCALAR if the response is OK and FALSE (0) for anything else.
 
 =back
 
+=head1 SECURITY
+
+While UI::Dialog tries to be secure on your behalf, this is not an
+easy task and it is advised that you never trust user input when
+dealing with any libraries (not just UI::Dialog).
+
+UI::Dialog does not allow for strings with shell command substitutions
+by default. This is achived by replacing all instances of back-tick
+B<`> characters with single-quotes B<'> and if any B<$()> constructs are
+found, the dollar sign is removed.
+
+To disable this behaviour, pass 'trust-input'=>1 into the module
+constructor or into any dialog function (such as B<menu>).
+
+See the B<examples/trust-input.pl> sample code for a demonstration.
+
 =head1 BUGS
 
 Please email the author with any bug reports. Include the name of the
@@ -612,7 +630,7 @@ Kevin C. Krinke, E<lt>kevin@krinke.caE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
- Copyright (C) 2013  Kevin C. Krinke <kevin@krinke.ca>
+ Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public

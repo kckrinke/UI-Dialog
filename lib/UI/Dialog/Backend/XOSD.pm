@@ -1,6 +1,6 @@
 package UI::Dialog::Backend::XOSD;
 ###############################################################################
-#  Copyright (C) 2013  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@ use FileHandle;
 BEGIN {
     use vars qw( $VERSION @ISA );
     @ISA = qw( UI::Dialog::Backend );
-    $VERSION = '1.10';
+    $VERSION = '1.11';
 }
 
 sub new {
@@ -75,6 +75,12 @@ sub new {
     unless (-x $self->{'_opts'}->{'bin'}) {
 		croak("the osd_cat binary could not be found at: ".$self->{'_opts'}->{'bin'});
     }
+
+    $self->{'_opts'}->{'trust-input'} =
+      ( exists $cfg->{'trust-input'}
+        && $cfg->{'trust-input'}==1
+      ) ? 1 : 0;
+
     return($self);
 }
 

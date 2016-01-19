@@ -1,5 +1,8 @@
+== Things I'd Like To Do ==
 
-o [anyone] Support a taint mode?
-  * somehow provide a taint-compatible mode?
-
+[ ] Support for Perl's taint mode (-t)
+[ ] More unit test coverage for all functionality
+[ ] Support all features for all backends
+[ ] Document how to install any given backend (from sources or packages)
+[ ] Implement more helper classes like UI::Dialog::Screen::*
 
