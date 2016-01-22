@@ -3,20 +3,11 @@
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-#use Test::More ( skip_all => "Skipped until better tests are written." );
-
-#use Test::More ( tests => 15 );
 use Test::More;
 BEGIN { use_ok( 'UI::Dialog::Backend::Whiptail' ); }
 require_ok( 'UI::Dialog::Backend::Whiptail' );
 
 # #########################
-
-# # Insert your test code below, the Test::More module is use()ed here so read
-# # its man page ( perldoc Test::More ) for help writing this test script.
-
 
 #
 # Note that we don't test fselect and dselect with Whiptail because

@@ -3,11 +3,7 @@
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-#use Test::More ( skip_all => "Skipped until better tests are written." );
-
-use Test::More ( tests => 4 );
+use Test::More;
 BEGIN { use_ok( 'UI::Dialog::Backend::ASCII' ); }
 require_ok( 'UI::Dialog::Backend::ASCII' );
 
@@ -21,3 +17,5 @@ my @methods = qw( new state ra rs rv beep clear
                   checklist radiolist fselect dselect
                   spinner draw_gauge end_gauge );
 can_ok( 'UI::Dialog::Backend::ASCII', @methods );
+
+done_testing();

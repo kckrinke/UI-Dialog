@@ -3,11 +3,6 @@
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-#use Test::More ( skip_all => "Skipped until better tests are written." );
-
-#use Test::More ( tests => 15 );
 use Test::More;
 BEGIN { use_ok( 'UI::Dialog::Backend::GDialog' ); }
 require_ok( 'UI::Dialog::Backend::GDialog' );
