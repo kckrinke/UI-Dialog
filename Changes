@@ -1,3 +1,8 @@
+1.12 - Fri, 22 Jan 2016 02:20:02 -0500
+
+ * Bugfixes for tests failing when backend binaries are not found
+ * Bugfixes for CDialog backend form() functionality
+
 1.11 - Sat, 10 Oct 2015 16:20:42 -0500
 
  * New 'trust-input' option implemented. CVE-2008-7315

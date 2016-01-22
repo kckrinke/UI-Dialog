@@ -25,7 +25,7 @@ use Text::Wrap qw( wrap );
 
 BEGIN {
   use vars qw($VERSION);
-  $VERSION = '1.11';
+  $VERSION = '1.12';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -298,6 +298,10 @@ sub prepare_command {
         $list .= ' "'.$item.'"';
       }
       $format =~ s!\{\{\Q${key}\E\}\}!${list}!mg;
+    } # if (ref($value) eq "ARRAY")
+    elsif ($key eq "list") {
+      # assume this has been manipulated already?
+      $format =~ s!\{\{\Q${key}\E\}\}!${value}!mg;
     }
     else {
       $value ||= '' unless defined $value;
