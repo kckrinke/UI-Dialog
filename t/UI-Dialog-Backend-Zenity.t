@@ -7,96 +7,109 @@ use Test::More;
 BEGIN { use_ok( 'UI::Dialog::Backend::Zenity' ); }
 require_ok( 'UI::Dialog::Backend::Zenity' );
 
-# #########################
+#########################
 
-my $obj = new UI::Dialog::Backend::Zenity
-  ( test_mode => 1 );
-isa_ok( $obj, 'UI::Dialog::Backend::Zenity' );
+eval { new UI::Dialog::Backend::Zenity(test_mode=>1); };
+if ( $@ ) {
+  if ($@ =~ m!binary could not be found!) {
+    diag("Tests skipped, backend binary not found.");
+  }
+  else {
+    diag("An unknown error occurred while trying to use backend: ".$@);
+  }
+  done_testing();
+}
+else {
 
-my $bin = $obj->get_bin();
+  my $obj = new UI::Dialog::Backend::Zenity
+    ( test_mode => 1 );
+  isa_ok( $obj, 'UI::Dialog::Backend::Zenity' );
 
-my @methods = qw( new state ra rs rv nautilus xosd beep clear
-                  yesno msgbox inputbox password textbox menu
-                  checklist radiolist fselect dselect );
-can_ok( 'UI::Dialog::Backend::Zenity', @methods );
+  my $bin = $obj->get_bin();
 
-$obj->yesno( title=>"TITLE", text => "TEXT",
-             width => 64, height => 16 );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --question --text "TEXT"'
-  );
+  my @methods = qw( new state ra rs rv nautilus xosd beep clear
+                    yesno msgbox inputbox password textbox menu
+                    checklist radiolist fselect dselect );
+  can_ok( 'UI::Dialog::Backend::Zenity', @methods );
 
-$obj->msgbox( title=>"TITLE", text => "TEXT",
-              width => 64, height => 16 );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --info --text "TEXT"'
-  );
-
-$obj->infobox( title=>"TITLE", text => "TEXT",
+  $obj->yesno( title=>"TITLE", text => "TEXT",
                width => 64, height => 16 );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --info --text "TEXT"'
-  );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --question --text "TEXT"'
+    );
 
-$obj->inputbox( title=>"TITLE", text => "TEXT",
-                width => 64, height => 16, entry => "ENTRY" );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --entry --entry-text "ENTRY" --text "TEXT"'
-  );
+  $obj->msgbox( title=>"TITLE", text => "TEXT",
+                width => 64, height => 16 );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --info --text "TEXT"'
+    );
 
-$obj->password( title=>"TITLE", text => "TEXT",
-                width => 64, height => 16, entry => "ENTRY" );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --entry --hide-text --entry-text "ENTRY" --text "TEXT"'
-  );
+  $obj->infobox( title=>"TITLE", text => "TEXT",
+                 width => 64, height => 16 );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --info --text "TEXT"'
+    );
 
-$obj->textbox( title=>"TITLE", path => "$0",
-               width => 64, height => 16 );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --text-info --filename "'.$0.'"'
-  );
+  $obj->inputbox( title=>"TITLE", text => "TEXT",
+                  width => 64, height => 16, entry => "ENTRY" );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --entry --entry-text "ENTRY" --text "TEXT"'
+    );
 
-$obj->menu( title=>"TITLE", text => "TEXT",
-            width => 64, height => 16,
-            list => [ "tag0", "item0", "tag1", "item1" ] );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --list --separator $'."'\\n'".' --column " " --column " " "tag0" "item0" "tag1" "item1"'
-  );
+  $obj->password( title=>"TITLE", text => "TEXT",
+                  width => 64, height => 16, entry => "ENTRY" );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --entry --hide-text --entry-text "ENTRY" --text "TEXT"'
+    );
 
-$obj->checklist( title=>"TITLE", text => "TEXT",
-                 width => 64, height => 16,
-                 list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --list --checklist --separator $'."'\\n'".' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"'
-  );
+  $obj->textbox( title=>"TITLE", path => "$0",
+                 width => 64, height => 16 );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --text-info --filename "'.$0.'"'
+    );
 
-$obj->radiolist( title=>"TITLE", text => "TEXT",
-                 width => 64, height => 16,
-                 list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE" --width "64" --height "16" --list --radiolist --separator $'."'\\n'".' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"'
-  );
+  $obj->menu( title=>"TITLE", text => "TEXT",
+              width => 64, height => 16,
+              list => [ "tag0", "item0", "tag1", "item1" ] );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --list --separator $'."'\\n'".' --column " " --column " " "tag0" "item0" "tag1" "item1"'
+    );
+
+  $obj->checklist( title=>"TITLE", text => "TEXT",
+                   width => 64, height => 16,
+                   list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --list --checklist --separator $'."'\\n'".' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"'
+    );
+
+  $obj->radiolist( title=>"TITLE", text => "TEXT",
+                   width => 64, height => 16,
+                   list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE" --width "64" --height "16" --list --radiolist --separator $'."'\\n'".' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"'
+    );
 
 
-#
-# Now test the trust-input feature for the Zenity backend.
-#
+  #
+  # Now test the trust-input feature for the Zenity backend.
+  #
 
-$obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
-              backtitle => 'BACKTITLE: `head -1 '.$0.'`',
-              text => 'TEXT: $(head -1 '.$0.')',
-              width => 64, height => 16 );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE: \'head -1 '.$0.'\'" --width "64" --height "16" --info --text "TEXT: (head -1 '.$0.')"'
-  );
+  $obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
+                backtitle => 'BACKTITLE: `head -1 '.$0.'`',
+                text => 'TEXT: $(head -1 '.$0.')',
+                width => 64, height => 16 );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE: \'head -1 '.$0.'\'" --width "64" --height "16" --info --text "TEXT: (head -1 '.$0.')"'
+    );
 
-$obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
-              backtitle => 'BACKTITLE: `head -1 '.$0.'`',
-              text => 'TEXT: $(head -1 '.$0.')',
-              'trust-input' => 1,
-              width => 64, height => 16 );
-is( $obj->get_unit_test_result(),
-    $bin.' --title "TITLE: `head -1 '.$0.'`" --width "64" --height "16" --info --text "TEXT: $(head -1 '.$0.')"'
-  );
+  $obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
+                backtitle => 'BACKTITLE: `head -1 '.$0.'`',
+                text => 'TEXT: $(head -1 '.$0.')',
+                'trust-input' => 1,
+                width => 64, height => 16 );
+  is( $obj->get_unit_test_result(),
+      $bin.' --title "TITLE: `head -1 '.$0.'`" --width "64" --height "16" --info --text "TEXT: $(head -1 '.$0.')"'
+    );
 
-done_testing();
+  done_testing();
+}
