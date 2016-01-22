@@ -934,7 +934,7 @@ sub form {
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--form');
-  $fmt = $self->append_format($fmt,'{{list}} {{height}} {{width}} {{listheight}}');
+  $fmt = $self->append_format($fmt,'{{text}} {{height}} {{width}} {{listheight}} {{list}}');
 
   my $list = '';
   while (@{$args->{'list'}}) {
