@@ -7,7 +7,7 @@
 
 #use Test::More ( skip_all => "Skipped until better tests are written." );
 
-use Test::More ( tests => 4 );
+use Test::More;
 BEGIN { use_ok( 'UI::Dialog' ); }
 require_ok( 'UI::Dialog' );
 
@@ -23,3 +23,5 @@ my @methods = qw( new state ra rs rv nautilus xosd beep clear
                   yesno msgbox inputbox password textbox menu
                   checklist radiolist fselect dselect );
 can_ok( 'UI::Dialog', @methods );
+
+done_testing();
