@@ -676,21 +676,6 @@ sub checklist {
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
-  if ($args->{'list'}) {
-		$args->{'list'} = [ ' ', [' ', 1] ] unless ref($args->{'list'}) eq "ARRAY";
-		my ($item,$info);
-		while (@{$args->{'list'}}) {
-			$item = shift(@{$args->{'list'}});
-			$info = shift(@{$args->{'list'}});
-			$command .= ' "'.($item||' ').'" "'.($info->[0]||' ').'" "'.(($info->[1]) ? 'on' : 'off').'"';
-		}
-  }
-  else {
-		$args->{'items'} = [ ' ', ' ', 'off' ] unless ref($args->{'items'}) eq "ARRAY";
-		foreach my $item (@{$args->{'items'}}) {
-			$command .= ' "' . ($item|' ') . '"';
-		}
-  }
   my ($rv,$selected) = $self->command_array($command);
   $self->rs('null');
   my $this_rv;
