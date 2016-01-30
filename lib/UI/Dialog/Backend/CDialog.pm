@@ -622,7 +622,6 @@ sub menu {
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  $fmt = $self->append_format($fmt,'--separate-output');
   $fmt = $self->append_format($fmt,'--menu');
   $fmt = $self->append_format($fmt,'{{text}} {{height}} {{width}} {{listheight}} {{list}}');
   my $command = $self->prepare_command
