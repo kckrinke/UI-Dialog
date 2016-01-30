@@ -1,3 +1,9 @@
+1.13 - Sat, 30 Jan 2016 16:12:04 -0500
+
+ * Bugfix for CDialog menu issue (RT111472)
+ * Patched for checklist issue (RT111429), thanks Ricky!
+ * Updated CONTRIBUTORS
+
 1.12 - Fri, 22 Jan 2016 02:20:02 -0500
 
  * Bugfixes for tests failing when backend binaries are not found
