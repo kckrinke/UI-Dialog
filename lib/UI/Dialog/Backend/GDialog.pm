@@ -18,8 +18,9 @@ package UI::Dialog::Backend::GDialog;
 ###############################################################################
 use 5.006;
 use strict;
-use FileHandle;
+use warnings;
 use Carp;
+use FileHandle;
 use UI::Dialog::Backend;
 
 BEGIN {

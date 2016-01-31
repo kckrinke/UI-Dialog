@@ -18,9 +18,10 @@ package UI::Dialog::Backend::XDialog;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
+use Carp;
 use FileHandle;
 use File::Basename;
-use Carp;
 use Cwd qw( abs_path );
 use UI::Dialog::Backend;
 

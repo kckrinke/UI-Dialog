@@ -18,6 +18,7 @@ package UI::Dialog::Backend::NotifySend;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
 use Carp;
 use UI::Dialog::Backend;
 use FileHandle;

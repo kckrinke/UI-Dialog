@@ -18,6 +18,7 @@ package UI::Dialog::Gauged;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
 use Carp;
 
 BEGIN {

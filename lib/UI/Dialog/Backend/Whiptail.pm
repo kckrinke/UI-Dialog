@@ -18,8 +18,9 @@ package UI::Dialog::Backend::Whiptail;
 ###############################################################################
 use 5.006;
 use strict;
-use FileHandle;
+use warnings;
 use Carp;
+use FileHandle;
 use Time::HiRes qw( sleep );
 use UI::Dialog::Backend;
 

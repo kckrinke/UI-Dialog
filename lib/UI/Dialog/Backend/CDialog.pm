@@ -18,9 +18,10 @@ package UI::Dialog::Backend::CDialog;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
+use Carp;
 use Config;
 use FileHandle;
-use Carp;
 use Cwd qw( abs_path );
 use Time::HiRes qw( sleep );
 use UI::Dialog::Backend;

@@ -18,9 +18,10 @@ package UI::Dialog::Backend::Zenity;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
+use Carp;
 use FileHandle;
 use Cwd qw( abs_path );
-use Carp;
 use UI::Dialog::Backend;
 
 BEGIN {

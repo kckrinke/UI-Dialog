@@ -18,6 +18,7 @@ package UI::Dialog::Backend;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
 use Carp;
 use Cwd qw( abs_path );
 use File::Basename;

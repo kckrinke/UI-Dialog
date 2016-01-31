@@ -18,6 +18,7 @@ package UI::Dialog::Console;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
 use Carp;
 use UI::Dialog;
 
