@@ -72,21 +72,21 @@ else {
               width => 64, height => 16,
               list => [ "tag0", "item0", "tag1", "item1" ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --defaultno --extra-button --help-button --no-cancel --no-collapse --no-shadow --shadow --tab-correct --max-input "" --tab-len "" --separate-output --menu "TEXT" "16" "64" "5"  "tag0" "item0" "tag1" "item1"'
+      $bin.' --title "TITLE" --backtitle "BACKTITLE" --defaultno --extra-button --help-button --no-cancel --no-collapse --no-shadow --shadow --tab-correct --max-input "" --tab-len "" --menu "TEXT" "16" "64" "5"  "tag0" "item0" "tag1" "item1"'
     );
 
   $obj->checklist( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                    width => 64, height => 16,
                    list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --defaultno --extra-button --help-button --no-cancel --no-collapse --no-shadow --shadow --tab-correct --max-input "" --tab-len "" --separate-output --checklist "TEXT" "16" "64" "5"  "tag0" "item0" "off" "tag1" "item1" "on" "tag0" "item0" "off" "tag1" "item1" "on"'
+      $bin.' --title "TITLE" --backtitle "BACKTITLE" --defaultno --extra-button --help-button --no-cancel --no-collapse --no-shadow --shadow --tab-correct --max-input "" --tab-len "" --separate-output --checklist "TEXT" "16" "64" "5"  "tag0" "item0" "off" "tag1" "item1" "on"'
     );
 
   $obj->radiolist( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                    width => 64, height => 16,
                    list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --defaultno --extra-button --help-button --no-cancel --no-collapse --no-shadow --shadow --tab-correct --max-input "" --tab-len "" --radiolist "TEXT" "16" "64" "5"  "tag0" "item0" "off" "tag1" "item1" "on" "tag0" "item0" "off" "tag1" "item1" "on"'
+      $bin.' --title "TITLE" --backtitle "BACKTITLE" --defaultno --extra-button --help-button --no-cancel --no-collapse --no-shadow --shadow --tab-correct --max-input "" --tab-len "" --radiolist "TEXT" "16" "64" "5"  "tag0" "item0" "off" "tag1" "item1" "on"'
     );
 
 
