@@ -23,7 +23,7 @@ use constant { TRUE => 1, FALSE => 0 };
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION = '1.13';
+    $VERSION = '1.14';
 }
 
 use UI::Dialog;

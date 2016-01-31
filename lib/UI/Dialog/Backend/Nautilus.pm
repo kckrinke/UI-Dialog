@@ -28,7 +28,7 @@ use Carp;
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION = '1.13';
+    $VERSION = '1.14';
 }
 
 sub new {
