@@ -23,6 +23,8 @@ use Carp;
 use Cwd qw( abs_path );
 use File::Basename;
 use Text::Wrap qw( wrap );
+use String::ShellQuote;
+use File::Slurp::Unicode;
 
 BEGIN {
   use vars qw($VERSION);
@@ -127,28 +129,44 @@ sub attr {
 #: return the last response data as an ARRAY
 sub ra {
   my $self = shift();
-  $self->_debug((join(" | ",(caller())))." > ra() > rset: ".((@_) ? "@_" : 'NULL'),3);
-  $self->{'_state'}->{'ra'} = ($_[0] =~ /^null$/i) ? [ 0 ] : [ @_ ] unless not @_;
-  my $aref = $self->{'_state'}->{'ra'};
-	ref($aref) eq "ARRAY" or $aref = [];
-  return(@{$aref});
+  my (@argv) = @_;
+  if (@argv) {
+    if (defined $argv[0] && $argv[0] =~ m!^null$!i) {
+      $self->{'_state'}{'ra'} = [];
+    } else {
+      $self->{'_state'}{'ra'} = \@argv;
+    }
+  } else {
+    $self->{'_state'}->{'ra'} ||= [];
+  }
+  return(@{ $self->{'_state'}->{'ra'} });
 }
 
 #: return the last response data as a SCALAR
 sub rs {
   my $self = shift();
-  my $rset = $_[0];
-  $self->_debug((join(" | ",(caller())))." > rs() > rset: ".(($rset) ? $rset : 'NULL'),3);
-  $self->{'_state'}->{'rs'} = ($rset =~ /^null$/i) ? 0 : $rset unless not $rset;
+  my (@argv) = @_;
+  if (@argv) {
+    if (defined $argv[0] && $argv[0] =~ m!^null$!i) {
+      $self->{'_state'}{'rs'} = '';
+    } else {
+      $self->{'_state'}{'rs'} = $argv[0];
+    }
+  }
   return($self->{'_state'}->{'rs'});
 }
 
 #: return the last exit code as a SCALAR
 sub rv {
   my $self = shift();
-  my $rset = $_[0];
-  $self->_debug((join(" | ",(caller())))." > rv() > rset: ".(($rset) ? $rset : 'NULL'),3);
-  $self->{'_state'}->{'rv'} = ($rset =~ /^null$/i) ? '0' : $rset unless not $rset;
+  my (@argv) = @_;
+  if (@argv) {
+    if (defined $argv[0] && $argv[0] =~ m!^null$!i) {
+      $self->{'_state'}{'rv'} = 0;
+    } else {
+      $self->{'_state'}{'rv'} = $argv[0];
+    }
+  }
   return($self->{'_state'}->{'rv'});
 }
 
@@ -231,7 +249,7 @@ sub append_format {
 #: simple test and if true; append value to format
 sub append_format_check {
   my ($self,$args,$fmt,$key,$value) = @_;
-  if (exists $args->{$key} and defined $args->{$key}) {
+  if (exists $args->{$key} and defined $args->{$key} and $args->{$key}) {
     $fmt = $self->append_format($fmt,$value);
   }
   return $fmt;
@@ -243,12 +261,12 @@ sub clean_format {
     die("Programmer error. clean_format requires a SCALAR ref, found: ".ref($sref));
   }
   $$sref =~ s!\x00!!mg; # remove nulls
-  unless ($trust) {
-    $$sref =~ s!\`!'!mg;
-    $$sref =~ s!\$\(!\(!mg;
-    $$sref =~ s!\$!\\\$!mg;
-  }
-  $$sref =~ s!"!\\"!mg; # escape double-quotes
+  #unless ($trust) {
+    #$$sref =~ s!\`!'!mg;
+    #$$sref =~ s!\$\(!\(!mg;
+    #$$sref =~ s!\$!\\\$!mg;
+  #}
+  #$$sref =~ s!"!\\"!mg;       # escape double-quotes
   return $sref;
 }
 
@@ -275,28 +293,26 @@ sub prepare_command {
         if (ref($item) eq "ARRAY") {
           # checklist, radiolist...
           if (@{$item} == 2) {
-            $self->clean_format( $rpl{$key}->{trust}, \$item->[0] );
-            $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'"';
+            $list .= ' '.shell_quote($item->[0]);
+            $list .= ' '.($item->[1] ? 'on' : 'off');
             next;
           }
           elsif (@{$item} == 3) {
-            $self->clean_format( $rpl{$key}->{trust}, \$item->[0] );
-            $self->clean_format( $rpl{$key}->{trust}, \$item->[2] );
-            $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'" "'.($item->[2]||1).'"';
+            $list .= ' '.shell_quote($item->[0]);
+            $list .= ' '.($item->[1] ? 'on' : 'off');
+            $list .= ' '.(shell_quote($item->[2])||1);
             next;
           }
           elsif (@{$item} == 4) {
-            $self->clean_format( $rpl{$key}->{trust}, \$item->[0] );
-            $self->clean_format( $rpl{$key}->{trust}, \$item->[2] );
-            $self->clean_format( $rpl{$key}->{trust}, \$item->[3] );
-            $list .= ' "'.$item->[0].'" "'.($item->[1] ? 'on' : 'off').'" "'.($item->[2]||1).'"';
+            $list .= ' ' . shell_quote($item->[0]);
+            $list .= ' '.($item->[1] ? 'on' : 'off');
+            $list .= ' '.(shell_quote($item->[2])||1);
             $list .= ' "'.$item->[3].'"';
             next;
           }
         }
         # menu...
-        $self->clean_format( $rpl{$key}->{trust}, \$item );
-        $list .= ' "'.$item.'"';
+        $list .= ' '.shell_quote($item);
       }
       $format =~ s!\{\{\Q${key}\E\}\}!${list}!mg;
     } # if (ref($value) eq "ARRAY")
@@ -312,8 +328,8 @@ sub prepare_command {
           $value = $self->_organize_text
             ( $value, $rpl{$key}->{width}, $rpl{$key}->{'trust'} );
         }
-        $self->clean_format( $rpl{$key}->{'trust'}, \$value );
-        $format =~ s!\{\{\Q${key}\E\}\}!"${value}"!mg;
+        $value = shell_quote($value);
+        $format =~ s!\{\{\Q${key}\E\}\}!${value}!mg;
       }
     }
   }
@@ -341,6 +357,24 @@ sub get_unit_test_result {
   return $self->{'test_mode_result'};
 }
 
+#: run command and return the rv and any text output from stderr
+sub perform_command {
+  my $self = $_[0];
+  my $cmnd = $_[1];
+  if ($self->is_unit_test_mode()) {
+    $self->{'test_mode_result'} = $cmnd;
+    return (0,'test_mode_result');
+  }
+  $self->_debug("perform_command: ".$cmnd.";");
+  my $tmp_stderr = $self->gen_tempfile_name();
+  system($cmnd." 2> ".$tmp_stderr);
+  my $rv = $? >> 8;
+  my $text = read_file($tmp_stderr);
+  unlink($tmp_stderr) if -f $tmp_stderr;
+  $self->_debug("perform_command: stderr=".shell_quote($text),2);
+  return ($rv,$text);
+}
+
 #: execute a simple command (return the exit code only);
 sub command_state {
   my $self = $_[0];
@@ -349,10 +383,11 @@ sub command_state {
     $self->{'test_mode_result'} = $cmnd;
     return 0;
   }
-  $self->_debug("command: ".$cmnd,1);
-  system($cmnd . " 2>&1 > /dev/null");
-  my $rv = $? >> 8;
-  $self->_debug("command rv: ".$rv,2);
+  my ($rv,$text) = $self->perform_command($cmnd);
+  $self->_debug("command_state: rv=".$rv,1);
+  $self->rv($rv);
+  $self->rs('null');
+  $self->ra('null');
   return($rv);
 }
 
@@ -364,10 +399,12 @@ sub command_string {
     $self->{'test_mode_result'} = $cmnd;
     return (wantarray) ? (0,'') : '';
   }
-  $self->_debug("command: ".$cmnd,1);
-  chomp(my $text = `$cmnd 2>&1`);
-  my $rv = $? >> 8;
-  $self->_debug("command rs: ".$rv." '".$text."'",2);
+  my ($rv,$text) = $self->perform_command($cmnd);
+  chomp($text);
+  $self->_debug("command_string: rv=".$rv.", rs=".shell_quote($text),1);
+  $self->rv($rv);
+  $self->rs($text);
+  $self->ra('null');
   return($text) unless defined wantarray;
   return (wantarray) ? ($rv,$text) : $text;
 }
@@ -380,18 +417,28 @@ sub command_array {
     $self->{'test_mode_result'} = $cmnd;
     return (wantarray) ? (0,[]) : [];
   }
-  $self->_debug("command: ".$cmnd,1);
-  chomp(my $text = `$cmnd 2>&1`);
-  my $rv = $? >> 8;
-  $self->_debug("command ra: ".$rv." '".$text."'",2);
-  return([split(/\n/,$text)]) unless defined wantarray;
-  return (wantarray) ? ($rv,[split(/\n/,$text)]) : [split(/\n/,$text)];
+  my ($rv,$text) = $self->perform_command($cmnd);
+  $self->_debug("command_array: rv=".$rv.", rs=".shell_quote($text),1);
+  $self->rv($rv);
+  $self->rs($text);
+  # this is so hackish that it may just work
+  my $alt_text = $text;
+  $alt_text =~ s!\r??\n!__\\n!mg; #: replace newlines with "a symbol"
+  my @alt_items = split(/_\\n/,$alt_text); #: split on "part symbol"
+  my @alt_final = ();
+  foreach my $alt_item (@alt_items) {
+    my $i = $alt_item;
+    $i =~ s!_$!!; #: remove the trailing bit of symbol
+    push(@alt_final,$i);
+  }
+  $self->ra(@alt_final); #: final array can now contain blanks
+  return([$self->ra()]) unless defined wantarray and wantarray;
+  return (wantarray) ? ($rv,[$self->ra()]) : [$self->ra()];
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #: Utility Methods
 #:
-
 
 #: make some noise
 sub beep {
@@ -411,9 +458,10 @@ sub word_wrap {
   my $width = shift() || 65;
   my $indent = shift() || "";
   my $sub_indent = shift() || "";
-  $Text::Wrap::columns = $width;
-  my @strings = wrap($indent, $sub_indent, @_);
-  return(@strings);
+  $Text::Wrap::columns = $width - 3;
+  my $raw = join("\n",@_);
+  my $string = wrap($indent, $sub_indent, $raw);
+  return(split(m!\n!,$string));
 }
 
 # generate a temporary file name
