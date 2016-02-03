@@ -463,7 +463,7 @@ sub msgbox {
       $sec = int($args->{'timeout'} ? ($args->{'timeout'} / 1000.0) : 1.0);
       $self->_debug("Will sleep for timeout=".$sec);
     } elsif ($args->{'wait'}) {
-      $sec = int($args->{'wait'} ? ($args->{'wait'} / 1000.0) : 1.0);
+      $sec = int($args->{'wait'} ? $args->{'wait'} : 1);
       $self->_debug("Will sleep for wait=".$sec);
     }
     sleep($sec) if $sec;
