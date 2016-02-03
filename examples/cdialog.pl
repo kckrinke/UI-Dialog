@@ -32,7 +32,7 @@ if ($d->state() eq "OK") {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $text =
-  q{This is a question widget. There should be "OK" and "CANCEL" buttons below this text message. The title of this message box should be "$d->yesno()".};
+  q{This is a question widget. There should be "YES" and "NO" buttons below this text message. The title of this message box should be "$d->yesno()".};
 my $is_yes = $d->yesno( title => '$d->yesno()', text => $text );
 if ($d->state() eq "OK" && $is_yes) {
     printerr("The user has answered YES to the yesno widget.");
