@@ -562,10 +562,9 @@ sub checklist {
   if (exists $args->{radiolist} && $args->{radiolist} == 1) {
     my ($rv,$selected) = $self->command_string($command);
     return($rv == 0 ? $selected : 0);
-  } else {
-    my ($rv,$selected) = $self->command_array($command);
-    return($rv == 0 ? @{$selected} : 0);
   }
+  my ($rv,$selected) = $self->command_array($command);
+  return($rv == 0 ? @{$selected} : 0);
 }
 #: a radio button list
 sub radiolist {
@@ -806,14 +805,7 @@ sub gauge_start {
   $self->rv($rv||'null');
   $self->ra('null');
   $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-    $this_rv = 0;
-  }
-  else {
-    $this_rv = 1;
-  }
-  return($this_rv);
+  return($rv && $rv >= 1);
 }
 sub gauge_inc {
   my $self = $_[0];
