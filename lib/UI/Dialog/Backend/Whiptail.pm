@@ -112,74 +112,23 @@ sub _del_gauge {
 sub append_format_base {
   my ($self,$args,$fmt) = @_;
   $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
+  $fmt = $self->append_format_check($args,$fmt,"defaultno","--defaultno");
+  $fmt = $self->append_format_check($args,$fmt,"default-item","--default-item {{default-item}}");
+  $fmt = $self->append_format_check($args,$fmt,"fullbuttons","--fullbuttons");
+  $fmt = $self->append_format_check($args,$fmt,"nocancel","--nocancel");
+  $fmt = $self->append_format_check($args,$fmt,"yes-button","--yes-button {{yes-button}}");
+  $fmt = $self->append_format_check($args,$fmt,"no-button","--no-button {{no-button}}");
+  $fmt = $self->append_format_check($args,$fmt,"ok-button","--ok-button {{ok-button}}");
+  $fmt = $self->append_format_check($args,$fmt,"cancel-button","--cancel-button {{cancel-button}}");
+  $fmt = $self->append_format_check($args,$fmt,"notags","--notags");
+  $fmt = $self->append_format_check($args,$fmt,"scrolltext","--scrolltext");
+  $fmt = $self->append_format_check($args,$fmt,"top-left","--top-left");
+  if ($self->{'_opts'}->{'force-no-separate-output'}) {
+    delete $args->{'separate-output'};
+  } else {
+    $fmt = $self->append_format_check($args,$fmt,"separate-output","--separate-output");
+  }
   return $fmt;
-}
-
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#: Override Inherited Methods
-#:
-sub command_state {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  if ($self->is_unit_test_mode()) {
-    $self->{'test_mode_result'} = $cmnd;
-    return 0;
-  }
-  $self->_debug("".$cmnd);
-  system($cmnd . " 2> /dev/null");
-  return($? >> 8);
-}
-sub command_string {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  if ($self->is_unit_test_mode()) {
-    $self->{'test_mode_result'} = $cmnd;
-    return (wantarray) ? (0,'') : '';
-  }
-  $self->_debug($cmnd);
-  $self->gen_tempfile_name(); # don't accept the first result
-  my $tmpfile = $self->gen_tempfile_name();
-  my $text;
-  system($cmnd." 2> ".$tmpfile);
-  my $rv = $? >> 8;
-  if (-f $tmpfile # don't assume the file exists
-      && open(WHIPF,"<".$tmpfile)) {
-		local $/;
-		$text = <WHIPF>;
-		close(WHIPF);
-		unlink($tmpfile);
-  }
-  else {
-    $text = "";
-  }
-  return($text) unless defined wantarray;
-  return (wantarray) ? ($rv,$text) : $text;
-}
-sub command_array {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  if ($self->is_unit_test_mode()) {
-    $self->{'test_mode_result'} = $cmnd;
-    return (wantarray) ? (0,[]) : [];
-  }
-  $self->_debug($cmnd);
-  $self->gen_tempfile_name(); # don't accept the first result
-  my $tmpfile = $self->gen_tempfile_name();
-  my $text;
-  system($cmnd." 2> ".$tmpfile);
-  my $rv = $? >> 8;
-  if (-f $tmpfile # don't assume the file exists
-      && open(WHIPF,"<".$tmpfile)) {
-		local $/;
-		$text = <WHIPF>;
-		close(WHIPF);
-		unlink($tmpfile);
-  }
-  else {
-    $text = "";
-  }
-  return([split("\n",$text)]) unless defined wantarray;
-  return (wantarray) ? ($rv,[split("\n",$text)]) : [split("\n",$text)];
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -206,23 +155,18 @@ sub yesno {
     );
 
   my $rv = $self->command_state($command);
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
   if ($rv && $rv >= 1) {
 		$self->ra("NO");
 		$self->rs("NO");
 		$self->rv($rv);
-		$this_rv = 0;
   }
   else {
 		$self->ra("YES");
 		$self->rs("YES");
 		$self->rv('null');
-		$this_rv = 1;
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -251,21 +195,8 @@ sub inputbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rv($rv);
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->rv('null');
-		$self->rs($text);
-		$self->ra($text);
-		$this_rv = $text;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $text : 0);
 }
 #: password boxes aren't supported by gdialog
 sub password {
@@ -287,7 +218,6 @@ sub msgbox {
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  $fmt = $self->append_format($fmt,'--scrolltext');
   if ($args->{'infobox'}) {
     $fmt = $self->append_format($fmt,'--infobox');
   }
@@ -300,27 +230,27 @@ sub msgbox {
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
+  $args->{'timeout'} ||= $args->{'wait'}
+    if exists $args->{'wait'} and $args->{'wait'};
+
+  my $tmp_term = $ENV{TERM};
+  $ENV{TERM} = 'vt220' # wow, really folks?
+    if ($args->{'infobox'});
   my $rv = $self->command_state($command);
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rv($rv);
-    $this_rv = 0;
-  }
-  else {
-    if ( ($args->{'msgbox'} eq "infobox")
-         && ($args->{'timeout'} || $args->{'wait'})
-       ) {
-			my $s = int(($args->{'wait'}) ? $args->{'wait'} :
-                  ($args->{'timeout'}) ? ($args->{'timeout'} / 1000.0) : 1.0);
-			sleep($s);
-		}
-		$self->rv('null');
-		$this_rv = 1;
+  if ($args->{'infobox'}) {
+    $ENV{TERM} = $tmp_term; # yep, really.
+    my $sec = 0;
+    if ($args->{'timeout'}) {
+      $sec = int($args->{'timeout'} ? ($args->{'timeout'} / 1000.0) : 1.0);
+      $self->_debug("Will sleep for timeout=".$sec);
+    } elsif ($args->{'wait'}) {
+      $sec = int($args->{'wait'} ? $args->{'wait'} : 1);
+      $self->_debug("Will sleep for wait=".$sec);
+    }
+    sleep($sec) if $sec;
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub infobox {
   my $self = shift();
@@ -340,7 +270,6 @@ sub textbox {
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  $fmt = $self->append_format($fmt,'--scrolltext');
   $fmt = $self->append_format($fmt,'--textbox');
   $fmt = $self->append_format($fmt,'{{path}} {{height}} {{width}}');
   my $command = $self->prepare_command
@@ -349,19 +278,8 @@ sub textbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rv($rv);
-		$this_rv = 0;
-  }
-  else {
-		$self->rv('null');
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -389,20 +307,10 @@ sub menu {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rv($rv);
-		$self->rs('null');
-		$self->ra('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->rv('null');
-		$self->rs($selected);
-		$self->ra($selected);
-		$this_rv = $selected;
-  }
+  $self->_post($args);
+  return($rv == 0 ? $selected : 0);
 }
+
 sub checklist {
   my $self = shift();
   my $caller = (caller(1))[3] || 'main';
@@ -429,23 +337,12 @@ sub checklist {
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
+  if (exists $args->{radiolist} && $args->{radiolist} == 1) {
+    my ($rv,$selected) = $self->command_string($command);
+    return($rv == 0 ? $selected : 0);
+  }
   my ($rv,$selected) = $self->command_array($command);
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rv($rv);
-		$self->ra('null');
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->rv('null');
-    $self->ra(@{$selected});
-    $self->rs(join("\n",@{$selected}));
-		$this_rv = $selected;
-  }
-  $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? @{$selected} : 0);
 }
 sub radiolist {
   my $self = shift();
