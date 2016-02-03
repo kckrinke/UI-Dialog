@@ -100,7 +100,7 @@ if ($d->state() eq "OK") {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $text =
   q{This is yet another password input box. Because no "entry" text was given, and the insecure option was not specified; the text entered will not be displayed visually at all. This is the best way to use the password dialog. No "entry" text and without the insecure option.};
-my $password = $d->password
+$password = $d->password
   ( title => '$d->password()',
     text => $text,
   );
