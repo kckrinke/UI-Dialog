@@ -1,3 +1,14 @@
+1.14 - Tue, 2 Feb 2016 19:52:03 -0500
+
+ * CDialog revisited, tests passing, example script re-written
+ * Whiptail revisited, tests passing, example script re-written
+ * Zenity revisited, tests passing, example script re-written
+ * (Note: need to revisit the rest of the backends, perhaps prune some)
+ * Copyright / license updates
+ * Use warnings across all modules
+ * Minimum perl version is consistently 5.6
+ * This is an "I'm sorry" release for all who actually use this module and I somehow broke your day.
+
 1.13 - Sat, 30 Jan 2016 16:12:04 -0500
 
  * Bugfix for CDialog menu issue (RT111472)

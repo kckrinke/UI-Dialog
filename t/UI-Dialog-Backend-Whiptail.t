@@ -41,58 +41,58 @@ else {
   $obj->yesno( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --yesno "TEXT" "16" "64"'
+      $bin.' --title TITLE --backtitle BACKTITLE --yesno TEXT 16 64'
     );
 
   $obj->msgbox( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                 width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --scrolltext --msgbox "TEXT" "16" "64"'
+      $bin.' --title TITLE --backtitle BACKTITLE --msgbox TEXT 16 64'
     );
 
   $obj->infobox( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                  width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --scrolltext --infobox "TEXT" "16" "64"'
+      $bin.' --title TITLE --backtitle BACKTITLE --infobox TEXT 16 64'
     );
 
   $obj->inputbox( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                   width => 64, height => 16, entry => "ENTRY" );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --inputbox "TEXT" "16" "64" "ENTRY"'
+      $bin.' --title TITLE --backtitle BACKTITLE --inputbox TEXT 16 64 ENTRY'
     );
 
   $obj->password( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                   width => 64, height => 16, entry => "ENTRY" );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --passwordbox "TEXT" "16" "64" "ENTRY"'
+      $bin.' --title TITLE --backtitle BACKTITLE --passwordbox TEXT 16 64 ENTRY'
     );
 
   $obj->textbox( title=>"TITLE", backtitle => "BACKTITLE", path => "$0",
                  width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --scrolltext --textbox "'.$0.'" "16" "64"'
+      $bin.' --title TITLE --backtitle BACKTITLE --textbox '.$0.' 16 64'
     );
 
   $obj->menu( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
               width => 64, height => 16,
               list => [ "tag0", "item0", "tag1", "item1" ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --separate-output --menu "TEXT" "16" "64" "10"  "tag0" "item0" "tag1" "item1"'
+      $bin.' --title TITLE --backtitle BACKTITLE --separate-output --menu TEXT 16 64 10  tag0 item0 tag1 item1'
     );
 
   $obj->checklist( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                    width => 64, height => 16,
                    list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --separate-output --checklist "TEXT" "16" "64" "10"  "tag0" "item0" "off" "tag1" "item1" "on"'
+      $bin.' --title TITLE --backtitle BACKTITLE --separate-output --checklist TEXT 16 64 10  tag0 item0 off tag1 item1 on'
     );
 
   $obj->radiolist( title=>"TITLE", backtitle => "BACKTITLE", text => "TEXT",
                    width => 64, height => 16,
                    list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --backtitle "BACKTITLE" --separate-output --radiolist "TEXT" "16" "64" "10"  "tag0" "item0" "off" "tag1" "item1" "on"'
+      $bin.' --title TITLE --backtitle BACKTITLE --separate-output --radiolist TEXT 16 64 10  tag0 item0 off tag1 item1 on'
     );
 
 
@@ -105,7 +105,7 @@ else {
                 text => 'TEXT: $(head -1 '.$0.')',
                 width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE: \'head -1 '.$0.'\'" --backtitle "BACKTITLE: \'head -1 '.$0.'\'" --scrolltext --msgbox "TEXT: (head -1 '.$0.')" "16" "64"'
+      $bin.q| --title 'TITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`' --backtitle 'BACKTITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`' --msgbox 'TEXT: $(head -1 t/UI-Dialog-Backend-Whiptail.t)' 16 64|
     );
 
   $obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
@@ -114,7 +114,7 @@ else {
                 'trust-input' => 1,
                 width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE: `head -1 '.$0.'`" --backtitle "BACKTITLE: `head -1 '.$0.'`" --scrolltext --msgbox "TEXT: $(head -1 '.$0.')" "16" "64"'
+      $bin.q| --title 'TITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`' --backtitle 'BACKTITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`' --msgbox 'TEXT: $(head -1 t/UI-Dialog-Backend-Whiptail.t)' 16 64|
     );
 
   done_testing();

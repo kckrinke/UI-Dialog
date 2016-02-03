@@ -1,6 +1,6 @@
 package UI::Dialog::Backend::Zenity;
 ###############################################################################
-#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2004-2016  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -18,15 +18,18 @@ package UI::Dialog::Backend::Zenity;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
+use Carp;
 use FileHandle;
 use Cwd qw( abs_path );
-use Carp;
 use UI::Dialog::Backend;
+use File::Slurp::Unicode;
+use String::ShellQuote;
 
 BEGIN {
   use vars qw( $VERSION @ISA );
   @ISA = qw( UI::Dialog::Backend );
-  $VERSION = '1.13';
+  $VERSION = '1.14';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -153,66 +156,26 @@ sub _is_bad_version {
 #: Override Inherited Methods
 #:
 
-#: execute a simple command (return the exit code only);
-sub command_state {
+# May want to override Backend::perform_command(). Not sure.
+#: run command and return the rv and any text output from stderr
+sub perform_command {
   my $self = $_[0];
   my $cmnd = $_[1];
   if ($self->is_unit_test_mode()) {
     $self->{'test_mode_result'} = $cmnd;
-    return 0;
+    return (0,'test_mode_result');
   }
-  $self->_debug("command: ".$cmnd,1);
-  system($cmnd . "> /dev/null 2> /dev/null");
+  $self->_debug("perform_command: ".$cmnd.";");
+  my $null_dev = $^O =~ /win32/i ? 'NUL:' : '/dev/null';
+  my $tmp_stderr = $self->gen_tempfile_name();
+  system($cmnd." 2> $null_dev > ".$tmp_stderr);
   my $rv = $? >> 8;
-  $self->_debug("command rv: ".$rv,2);
-  return($rv);
+  my $text = read_file($tmp_stderr);
+  unlink($tmp_stderr) if -f $tmp_stderr;
+  $self->_debug("perform_command: stderr=".shell_quote($text),2);
+  return ($rv,$text);
 }
 
-#: execute a command and return the exit code and one-line SCALAR
-sub command_string {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  if ($self->is_unit_test_mode()) {
-    $self->{'test_mode_result'} = $cmnd;
-    return (wantarray) ? (0,'') : '';
-  }
-  $self->_debug("command: ".$cmnd,1);
-  my $text;
-  if ($self->_is_bad_version()) {
-		#we should ignore STDERR...
-    chomp($text = `$cmnd 2> /dev/null`);
-  }
-  else {
-		chomp($text = `$cmnd 2>&1`);
-  }
-  my $rv = $? >> 8;
-  $self->_debug("command rs: ".$rv." '".$text."'",2);
-  return($text) unless defined wantarray;
-  return (wantarray) ? ($rv,$text) : $text;
-}
-
-#: execute a command and return the exit code and ARRAY of data
-sub command_array {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  if ($self->is_unit_test_mode()) {
-    $self->{'test_mode_result'} = $cmnd;
-    return (wantarray) ? (0,[]) : [];
-  }
-  $self->_debug("command: ".$cmnd,1);
-  my $text;
-  if ($self->_is_bad_version()) {
-		#we should ignore STDERR...
-    chomp($text = `$cmnd 2> /dev/null`);
-  }
-  else {
-		chomp($text = `$cmnd 2>&1`);
-  }
-  my $rv = $? >> 8;
-  $self->_debug("command ra: ".$rv." '".$text."'",2);
-  return([split(/\n/,$text)]) unless defined wantarray;
-  return (wantarray) ? ($rv,[split(/\n/,$text)]) : [split(/\n/,$text)];
-}
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #: Public Methods
@@ -238,22 +201,16 @@ sub question {
     );
 
   my $rv = $self->command_state($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
   if ($rv && $rv >= 1) {
 		$self->ra("NO");
 		$self->rs("NO");
-		$this_rv = 0;
   }
   else {
 		$self->ra("YES");
 		$self->rs("YES");
-		$this_rv = 1;
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 #: Zenity doesn't support alternation of the buttons like gdialog et al.
 #: so here we just wrap for compliance.
@@ -291,20 +248,8 @@ sub entry {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($text);
-		$self->rs($text);
-		$this_rv = $text;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $text : 0);
 }
 sub inputbox {
   my $self = shift();
@@ -344,18 +289,8 @@ sub info {
     );
 
   my $rv = $self->command_state($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub infobox {
   my $self = shift();
@@ -398,23 +333,8 @@ sub text_info {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv = 0;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-  }
-  elsif ($args->{'editable'}) {
-		$self->ra($text);
-		$self->rs($text);
-		$this_rv = $text;
-  }
-  else {
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $text : 0);
 }
 sub textbox {
   my $self = shift();
@@ -445,7 +365,7 @@ sub list {
   elsif ($args->{'radiolist'}) {
     $fmt = $self->append_format($fmt,'--radiolist');
   }
-  $fmt = $self->append_format($fmt,"--separator \$'\\n'");
+  $fmt = $self->append_format($fmt,"--separator '\\n'");
 
   if (ref($args->{'list'}) eq "ARRAY") {
     if ($args->{'checklist'}||$args->{'radiolist'}) {
@@ -475,28 +395,15 @@ sub list {
 
   my $command = $self->prepare_command( $args, $fmt );
 
-  my ($rv,$selected) = $self->command_array($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  if ($rv && $rv >= 1) {
-		$self->_post($args);
-		return(0);
+  if ($args->{'checklist'}) {
+    my ($rv,$selected) = $self->command_array($command);
+    $self->_post($args);
+    return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+    return($rv == 0 ? $self->ra() : (0));
   }
-  else {
-		if ($args->{'checklist'}) {
-			$self->ra(@$selected);
-			$self->rs(join("\n",@$selected));
-			$self->_post($args);
-			return(@{$selected});
-		}
-    else {
-			$self->ra($selected->[0]);
-			$self->rs($selected->[0]);
-			$self->_post($args);
-			return($selected->[0]);
-		}
-  }
+  my ($rv,$selected) = $self->command_string($command);
+  $self->_post($args);
+  return($rv == 0 ? $selected : 0);
 }
 sub menu {
   my $self = shift();
@@ -538,20 +445,8 @@ sub fselect {
 
   $self->_debug("fselect: ".$args->{'path'});
   my ($rv,$file) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($file);
-		$self->rs($file);
-		$this_rv = $file;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $file : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -581,20 +476,8 @@ sub dselect {
 
   $self->_debug("fselect: ".$args->{'path'});
   my ($rv,$file) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($file);
-		$self->rs($file);
-		$this_rv = $file;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $file : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -622,22 +505,11 @@ sub calendar {
     );
 
   my ($rv,$date) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		chomp($date);
-		# the end programmer can alter the date format
-		$self->ra(split(/\//,$date)) if $date =~ /^\d+\/\d+\/\d+$/;
-		$self->rs($date);
-		$this_rv = $date;
+  if ($rv == 0) {
+    $self->ra(split(m!/!,$date));
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $date : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -681,14 +553,7 @@ sub gauge_start {
   $self->rv($rv||'null');
   $self->ra('null');
   $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-    $this_rv = 0;
-  }
-  else {
-    $this_rv = 1;
-  }
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub gauge_inc {
   my $self = $_[0];

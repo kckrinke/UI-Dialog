@@ -1,6 +1,6 @@
 package UI::Dialog;
 ###############################################################################
-#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2004-2016  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -18,11 +18,12 @@ package UI::Dialog;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
 use Carp;
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION = '1.13';
+    $VERSION = '1.14';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -905,7 +906,7 @@ Kevin C. Krinke, E<lt>kevin@krinke.caE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
- Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
+ Copyright (C) 2004-2016  Kevin C. Krinke <kevin@krinke.ca>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public

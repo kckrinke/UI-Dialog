@@ -35,80 +35,58 @@ else {
   $obj->yesno( title=>"TITLE", text => "TEXT",
                width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --question --text "TEXT"'
+      $bin.q| --title TITLE --width 64 --height 16 --question --text TEXT|
     );
 
   $obj->msgbox( title=>"TITLE", text => "TEXT",
                 width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --info --text "TEXT"'
+      $bin.q| --title TITLE --width 64 --height 16 --info --text TEXT|
     );
 
   $obj->infobox( title=>"TITLE", text => "TEXT",
                  width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --info --text "TEXT"'
+      $bin.q| --title TITLE --width 64 --height 16 --info --text TEXT|
     );
 
   $obj->inputbox( title=>"TITLE", text => "TEXT",
                   width => 64, height => 16, entry => "ENTRY" );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --entry --entry-text "ENTRY" --text "TEXT"'
+      $bin.q| --title TITLE --width 64 --height 16 --entry --entry-text ENTRY --text TEXT|
     );
 
   $obj->password( title=>"TITLE", text => "TEXT",
                   width => 64, height => 16, entry => "ENTRY" );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --entry --hide-text --entry-text "ENTRY" --text "TEXT"'
+      $bin.q| --title TITLE --width 64 --height 16 --entry --hide-text --entry-text ENTRY --text TEXT|
     );
 
   $obj->textbox( title=>"TITLE", path => "$0",
                  width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --text-info --filename "'.$0.'"'
+      $bin.q| --title TITLE --width 64 --height 16 --text-info --filename t/UI-Dialog-Backend-Zenity.t|
     );
 
   $obj->menu( title=>"TITLE", text => "TEXT",
               width => 64, height => 16,
               list => [ "tag0", "item0", "tag1", "item1" ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --list --separator $'."'\\n'".' --column " " --column " " "tag0" "item0" "tag1" "item1"'
+      $bin.q| --title TITLE --width 64 --height 16 --list --separator '\n' --column " " --column " " "tag0" "item0" "tag1" "item1"|
     );
 
   $obj->checklist( title=>"TITLE", text => "TEXT",
                    width => 64, height => 16,
                    list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --list --checklist --separator $'."'\\n'".' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"'
+      $bin.q| --title TITLE --width 64 --height 16 --list --checklist --separator '\n' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"|
     );
 
   $obj->radiolist( title=>"TITLE", text => "TEXT",
                    width => 64, height => 16,
                    list => [ "tag0", [ "item0", 0 ], "tag1", [ "item1", 1 ] ] );
   is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE" --width "64" --height "16" --list --radiolist --separator $'."'\\n'".' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"'
-    );
-
-
-  #
-  # Now test the trust-input feature for the Zenity backend.
-  #
-
-  $obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
-                backtitle => 'BACKTITLE: `head -1 '.$0.'`',
-                text => 'TEXT: $(head -1 '.$0.')',
-                width => 64, height => 16 );
-  is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE: \'head -1 '.$0.'\'" --width "64" --height "16" --info --text "TEXT: (head -1 '.$0.')"'
-    );
-
-  $obj->msgbox( title=>'TITLE: `head -1 '.$0.'`',
-                backtitle => 'BACKTITLE: `head -1 '.$0.'`',
-                text => 'TEXT: $(head -1 '.$0.')',
-                'trust-input' => 1,
-                width => 64, height => 16 );
-  is( $obj->get_unit_test_result(),
-      $bin.' --title "TITLE: `head -1 '.$0.'`" --width "64" --height "16" --info --text "TEXT: $(head -1 '.$0.')"'
+      $bin.q| --title TITLE --width 64 --height 16 --list --radiolist --separator '\n' --column " " --column " " --column " " "FALSE" "tag0" "item0" "TRUE" "tag1" "item1"|
     );
 
   done_testing();

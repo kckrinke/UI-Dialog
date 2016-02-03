@@ -1,6 +1,6 @@
 package UI::Dialog::Backend::GDialog;
 ###############################################################################
-#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2004-2016  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -18,14 +18,15 @@ package UI::Dialog::Backend::GDialog;
 ###############################################################################
 use 5.006;
 use strict;
-use FileHandle;
+use warnings;
 use Carp;
+use FileHandle;
 use UI::Dialog::Backend;
 
 BEGIN {
   use vars qw( $VERSION @ISA );
   @ISA = qw( UI::Dialog::Backend );
-  $VERSION = '1.13';
+  $VERSION = '1.14';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

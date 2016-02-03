@@ -1,6 +1,6 @@
 package UI::Dialog::Backend::XDialog;
 ###############################################################################
-#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2004-2016  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -18,16 +18,17 @@ package UI::Dialog::Backend::XDialog;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
+use Carp;
 use FileHandle;
 use File::Basename;
-use Carp;
 use Cwd qw( abs_path );
 use UI::Dialog::Backend;
 
 BEGIN {
   use vars qw( $VERSION @ISA );
   @ISA = qw( UI::Dialog::Backend );
-  $VERSION = '1.13';
+  $VERSION = '1.14';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

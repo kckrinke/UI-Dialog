@@ -9,6 +9,7 @@ WriteMakefile
     { Text::Wrap => 0,
       File::Basename => 0,
       Time::HiRes => 0,
+      perl => 5.006
     },             # e.g., Module::Name => 1.1
     ($] >= 5.005 ? ## Add these new keywords supported since 5.005
      ( AUTHOR          => 'Kevin C. Krinke <kevin@krinke.ca>') : () ),

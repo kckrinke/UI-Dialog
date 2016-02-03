@@ -1,6 +1,6 @@
 package UI::Dialog::Backend::Nautilus;
 ###############################################################################
-#  Copyright (C) 2015  Kevin C. Krinke <kevin@krinke.ca>
+#  Copyright (C) 2004-2016  Kevin C. Krinke <kevin@krinke.ca>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,7 @@ package UI::Dialog::Backend::Nautilus;
 ###############################################################################
 use 5.006;
 use strict;
+use warnings;
 use Carp;
 
 
@@ -27,7 +28,7 @@ use Carp;
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION = '1.13';
+    $VERSION = '1.14';
 }
 
 sub new {
