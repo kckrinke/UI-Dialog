@@ -761,9 +761,9 @@ sub form {
       list => $self->make_kvl($args,$args->{'list'}),
     );
 
-  my ($rv,@selected) = $self->command_array($command);
+  my ($rv,$selected) = $self->command_array($command);
   $self->_post($args);
-  return($rv == 0 ? \@selected : 0) unless defined wantarray;
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
   return($rv == 0 ? $self->ra() : (0));
 }
 
