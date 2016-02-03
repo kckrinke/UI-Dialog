@@ -770,7 +770,7 @@ sub _organize_text {
     }
   }
   $text = $self->_strip_text($text);
-  chomp($text);
+  chomp($text) if $text;
   return($text);
 }
 
@@ -813,6 +813,7 @@ sub _find_bin {
 sub _strip_text {
   my $self = $_[0];
   my $text = $_[1];
+  $text ||= '';
   $text =~ s!\\Z[0-7bBuUrRn]!!gmi;
   $text =~ s!\[[AC]=\w+\]!!gmi;
   $text =~ s!\[/?[BURN]\]!!gmi;
