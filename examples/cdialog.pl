@@ -86,7 +86,7 @@ if ($d->state() eq "OK") {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $text =
   q{This is another password input box. Because no "entry" text was given, but the insecure option was specified; the password will be displayed as asterisks for each character and the field below should be empty to begin with.};
-my $password = $d->password
+$password = $d->password
   ( title => '$d->password()',
     text => $text,
     insecure => 1
