@@ -199,7 +199,7 @@ sub append_format_base {
   if ($self->{'_opts'}->{'force-no-separate-output'}) {
     delete $args->{'separate-output'};
   } else {
-    $fmt = $self->append_format_check($args,$fmt,"separate-output","--separate-output")
+    $fmt = $self->append_format_check($args,$fmt,"separate-output","--separate-output");
   }
   if ($self->is_cdialog()) {
     $fmt = $self->append_format($fmt,'--colors');
