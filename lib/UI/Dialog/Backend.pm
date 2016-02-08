@@ -28,7 +28,7 @@ use File::Slurp::Unicode;
 
 BEGIN {
   use vars qw($VERSION);
-  $VERSION = '1.14';
+  $VERSION = '1.15';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

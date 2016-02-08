@@ -1,3 +1,8 @@
+1.15 - Mon, 8 Feb 2016 18:55:33 -0500
+
+ * Added dependencies for String::ShellQuote, File::Slurp::Unicode
+ * Fixed trust-input, this should now work perfectly (thanks to shell_quote)
+
 1.14 - Tue, 2 Feb 2016 19:52:03 -0500
 
  * CDialog revisited, tests passing, example script re-written
