@@ -270,6 +270,14 @@ sub clean_format {
   return $sref;
 }
 
+sub trust_quote {
+  my ($self,$kv,$string) = @_;
+  if ($kv->{trust}) {
+    return '"'.$string.'"';
+  }
+  return shell_quote($string);
+}
+
 #: Given a command string "format" and any key/value replacement pairs,
 #: construct the exec'able command string.
 sub prepare_command {
@@ -293,26 +301,26 @@ sub prepare_command {
         if (ref($item) eq "ARRAY") {
           # checklist, radiolist...
           if (@{$item} == 2) {
-            $list .= ' '.shell_quote($item->[0]);
+            $list .= ' '.$self->trust_quote($rpl{$key},$item->[0]);
             $list .= ' '.($item->[1] ? 'on' : 'off');
             next;
           }
           elsif (@{$item} == 3) {
-            $list .= ' '.shell_quote($item->[0]);
+            $list .= ' '.$self->trust_quote($rpl{$key},$item->[0]);
             $list .= ' '.($item->[1] ? 'on' : 'off');
-            $list .= ' '.(shell_quote($item->[2])||1);
+            $list .= ' '.($self->trust_quote($rpl{$key},$item->[2])||1);
             next;
           }
           elsif (@{$item} == 4) {
-            $list .= ' ' . shell_quote($item->[0]);
+            $list .= ' ' . $self->trust_quote($rpl{$key},$item->[0]);
             $list .= ' '.($item->[1] ? 'on' : 'off');
-            $list .= ' '.(shell_quote($item->[2])||1);
-            $list .= ' "'.$item->[3].'"';
+            $list .= ' '.($self->trust_quote($rpl{$key},$item->[2])||1);
+            $list .= ' '.$self->trust_quote($rpl{$key},$item->[3]);
             next;
           }
         }
         # menu...
-        $list .= ' '.shell_quote($item);
+        $list .= ' '.$self->trust_quote($rpl{$key},$item);
       }
       $format =~ s!\{\{\Q${key}\E\}\}!${list}!mg;
     } # if (ref($value) eq "ARRAY")
@@ -328,7 +336,7 @@ sub prepare_command {
           $value = $self->_organize_text
             ( $value, $rpl{$key}->{width}, $rpl{$key}->{'trust'} );
         }
-        $value = shell_quote($value);
+        $value = $self->trust_quote($rpl{$key},$value);
         $format =~ s!\{\{\Q${key}\E\}\}!${value}!mg;
       }
     }
