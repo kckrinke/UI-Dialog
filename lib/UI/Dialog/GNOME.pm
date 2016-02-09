@@ -25,7 +25,7 @@ use UI::Dialog;
 BEGIN {
     use vars qw( $VERSION @ISA );
     @ISA = qw( UI::Dialog );
-    $VERSION = '1.14';
+    $VERSION = '1.15';
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
