@@ -114,7 +114,7 @@ else {
                 'trust-input' => 1,
                 width => 64, height => 16 );
   is( $obj->get_unit_test_result(),
-      $bin.q| --title 'TITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`' --backtitle 'BACKTITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`' --msgbox 'TEXT: $(head -1 t/UI-Dialog-Backend-Whiptail.t)' 16 64|
+      $bin.q| --title "TITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`" --backtitle "BACKTITLE: `head -1 t/UI-Dialog-Backend-Whiptail.t`" --msgbox "TEXT: $(head -1 t/UI-Dialog-Backend-Whiptail.t)" "16" "64"|
     );
 
   done_testing();
