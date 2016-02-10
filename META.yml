@@ -9,7 +9,7 @@ requires:
     File::Basename:                0
     Time::HiRes:                   0
     String::ShellQuote:            0
-    File::Slurp::Unicode:          0
+    File::Slurp:                   0
 
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.17

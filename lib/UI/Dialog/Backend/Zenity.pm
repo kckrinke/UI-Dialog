@@ -23,7 +23,7 @@ use Carp;
 use FileHandle;
 use Cwd qw( abs_path );
 use UI::Dialog::Backend;
-use File::Slurp::Unicode;
+use File::Slurp;
 use String::ShellQuote;
 
 BEGIN {

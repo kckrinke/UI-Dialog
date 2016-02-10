@@ -24,7 +24,7 @@ use Cwd qw( abs_path );
 use File::Basename;
 use Text::Wrap qw( wrap );
 use String::ShellQuote;
-use File::Slurp::Unicode;
+use File::Slurp;
 
 BEGIN {
   use vars qw($VERSION);
