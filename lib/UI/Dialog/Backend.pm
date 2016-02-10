@@ -559,59 +559,76 @@ sub fselect {
 
   my $cwd = abs_path();
   $args->{'path'} ||= abs_path();
+  my $pre_selection = $args->{'path'};
   my $path = $args->{'path'};
+  if (-f $pre_selection) {
+    $path = dirname($path);
+  }
   if (!$path || $path =~ /^(\.|\.\/)$/) {
     $path = $cwd;
   }
-  my $file;
+  my $user_selection = $pre_selection;
   my ($menu,$list) = ([],[]);
  FSEL: while ($self->state() ne "ESC" && $self->state() ne "CANCEL") {
-		my $entries = ($args->{'dselect'}) ? ['[new directory]'] :  ['[new file]'];
-		($menu, $list) = $self->_list_dir($path,$entries);
-		$file = $self->menu(height=>$args->{'height'},width=>$args->{'width'},listheight=>($args->{'listheight'}||$args->{'menuheight'}),
-                        title=>$args->{'title'},text=>$path,list=>$menu);
+    my $entries = ($args->{'dselect'}) ? ['[new directory]'] :  ['[new file]'];
+    ($menu, $list) = $self->_list_dir($path, $entries, $args->{'dselect'});
+    $user_selection = $self->menu
+      ( height=>$args->{'height'},
+        width=>$args->{'width'},
+        listheight=>($args->{'listheight'}||$args->{'menuheight'}),
+        title=>$args->{'title'},
+        backtitle=>$args->{'backtitle'},
+        text=>"Select a ".($args->{'dselect'}?'path':'file').": ".$path,
+        list=>$menu
+      );
 		if ($self->state() eq "CANCEL") {
 			$self->rv(1);
 			$self->rs('NULL');
 			$self->ra('NULL');
 			last FSEL;
 		}
-    elsif ($file ne "") {
-			if ($list->[($file - 1 || 0)] =~ /^\[(new\sdirectory|new\sfile)\]$/) {
+    elsif ($user_selection ne "") {
+      if ($list->[($user_selection - 1 || 0)] =~ /^\[(new\sdirectory|new\sfile)\]$/) {
 				my $nfn;
 				while (!$nfn || -e $path."/".$nfn) {
-					$nfn = $self->inputbox(height=>$args->{'height'},width=>$args->{'width'},title=>$args->{'title'},
-                                 text=>'Enter a name (will have a base directory of: '.$path.')');
+          $nfn = $self->inputbox
+            ( height=>$args->{'height'},
+              width=>$args->{'width'},
+              title=>$args->{'title'},
+              text=>'Enter a name (will have a base directory of: '.$path.')'
+            );
 					next FSEL if $self->state() eq "ESC" or $self->state() eq "CANCEL";
 					if (-e $path."/".$nfn) {
-            $self->msgbox(title=>'error',text=>$path."/".$nfn.' already exists! Choose another name please.');
+            $self->msgbox
+              ( title=>'error',
+                text=>$path."/".$nfn.' exists. Choose another name please.');
           }
 				}
-				$file = $path."/".$nfn;
-				$file =~ s!/$!! unless $file =~ m!^/$!;
-				$file =~ s!/\./!/!g; $file =~ s!/+!/!g;
+        $user_selection = $path."/".$nfn;
+        $user_selection =~ s!/$!! unless $user_selection =~ m!^/$!;
+        $user_selection =~ s!/\./!/!g; $user_selection =~ s!/+!/!g;
 				last FSEL;
 			}
-      elsif ($list->[($file - 1 || 0)] eq "../") {
+      elsif ($list->[($user_selection - 1 || 0)] eq "../") {
 				$path = dirname($path);
 			}
-      elsif ($list->[($file - 1 || 0)] eq "./") {
-				$file = $path;
-				$file =~ s!/$!! unless $file =~ m!^/$!;
-				$file =~ s!/\./!/!g; $file =~ s!/+!/!g;
+      elsif ($list->[($user_selection - 1 || 0)] eq "./") {
+        $user_selection = $path;
+        $user_selection =~ s!/$!! unless $user_selection =~ m!^/$!;
+        $user_selection =~ s!/\./!/!g; $user_selection =~ s!/+!/!g;
 				last FSEL;
 			}
-      elsif (-d $path."/".$list->[($file - 1 || 0)]) {
-				$path = $path."/".$list->[($file - 1 || 0)];
+      elsif (-d $path."/".$list->[($user_selection - 1 || 0)]) {
+        $path = $path."/".$list->[($user_selection - 1 || 0)];
 			}
-      elsif (-e $path."/".$list->[($file - 1 || 0)]) {
-				$file = $path."/".$list->[($file - 1 || 0)];
-				$file =~ s!/$!! unless $file =~ m!^/$!;
-				$file =~ s!/\./!/!g; $file =~ s!/+!/!g;
+      elsif (-e $path."/".$list->[($user_selection - 1 || 0)]) {
+        $user_selection = $path."/".$list->[($user_selection - 1 || 0)];
+        $user_selection =~ s!/$!! unless $user_selection =~ m!^/$!;
+        $user_selection =~ s!/\./!/!g; $user_selection =~ s!/+!/!g;
 				last FSEL;
 			}
 		}
-		$file = undef();
+    $user_selection = undef();
 		$path =~ s!(/*)!/!; $path =~ s!/\./!/!g;
   }
   $self->_beep($args->{'beepafter'});
@@ -622,8 +639,8 @@ sub fselect {
 		return(0);
   }
   else {
-		$self->rs($file);
-		return($file);
+    $self->rs($user_selection);
+    return($user_selection);
   }
 }
 
@@ -842,6 +859,7 @@ sub _list_dir {
   my $self = shift();
   my $path = shift() || return();
   my $pref = shift();
+  my $paths_only = (@_ == 1 && $_[0] == 1) ? 1 : 0;
   my (@listing,@list);
   if (opendir(GETDIR,$path)) {
 		my @dir_data = readdir(GETDIR);
@@ -852,8 +870,10 @@ sub _list_dir {
 		foreach my $dir (sort(grep { -d $path."/".$_ } @dir_data)) {
       push(@listing,$dir."/");
     }
-		foreach my $item (sort(grep { !-d $path."/".$_ } @dir_data)) {
-      push(@listing,$item);
+    unless ($paths_only) {
+      foreach my $item (sort(grep { !-d $path."/".$_ } @dir_data)) {
+        push(@listing,$item);
+      }
     }
 		my $c = 1;
     foreach my $item (@listing) {
