@@ -1,3 +1,9 @@
+1.16 - Tue, 9 Feb 2016 21:44:42 -0500
+
+ * Fix for File::Slurp::Unicode dependency (Closes: RT111890)
+ * Fixes for ASCII backend
+ * examples/ascii.pl en-par with cdialog, whiptail and zenity
+
 1.15 - Mon, 8 Feb 2016 18:55:33 -0500
 
  * Added dependencies for String::ShellQuote, File::Slurp::Unicode
