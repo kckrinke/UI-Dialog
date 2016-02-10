@@ -6,8 +6,6 @@ use diagnostics;
 # demo helper
 sub printerr { print STDERR "\n".'UI::Dialog : '.join( " ", @_ )."\n"; sleep(1); }
 
-#use UI::Dialog::Backend::Whiptail;
-#my $d = new UI::Dialog::Backend::Whiptail
 use UI::Dialog::Backend::Whiptail;
 my $d = new UI::Dialog::Backend::Whiptail
   ( title => "Whiptail Demo",

@@ -713,11 +713,12 @@ sub menu {
     shift(); $caller = shift();
   }
   my $args = $self->_pre($caller,@_);
-  $args->{'menu'} = $args->{'list'} if ref($args->{'list'}) eq "ARRAY";
+  $args->{'menu'} ||= ref($args->{'list'}) ? $args->{'list'} : [$args->{'list'}];
+  $args->{'menu'} ||= [];
   my $string;
   my $rs = '';
-  my $m;
-  $m = @{$args->{'menu'}} if ref($args->{'menu'}) eq "ARRAY";
+  my $m = 0;
+  $m = @{$args->{'menu'}};
   my ($valid,$menu,$realm) = ([],[],[]);
   push(@{$menu},@{$args->{'menu'}}) if ref($args->{'menu'}) eq "ARRAY";
 
