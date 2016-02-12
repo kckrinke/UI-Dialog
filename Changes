@@ -1,3 +1,10 @@
+1.17 - Fri, 12 Feb 2016 00:16:03 -0500
+
+ * gdialog cleaned up, example script and test included
+ * kdialog cleaned up, example script and test included
+ * general unit tests fleshed out and/or updated
+ * password dialog for gdialog no longer supported
+
 1.16 - Tue, 9 Feb 2016 21:44:42 -0500
 
  * Fix for File::Slurp::Unicode dependency (Closes: RT111890)
