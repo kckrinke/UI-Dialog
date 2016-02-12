@@ -359,6 +359,8 @@ sub list {
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--list');
+  $args->{'checklist'} ||= 0;
+  $args->{'radiolist'} ||= 0;
   if ($args->{'checklist'}) {
     $fmt = $self->append_format($fmt,'--checklist');
   }
