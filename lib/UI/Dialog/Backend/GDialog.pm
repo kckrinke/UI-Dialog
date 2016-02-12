@@ -177,10 +177,8 @@ sub inputbox {
 }
 #: password boxes aren't supported by gdialog
 sub password {
-  my $self = shift();
-  $self->msgbox(text=> 'GDialog does not support passwords at all, '.
-                'you will see the text as you type in the next dialog.' );
-  return($self->inputbox('caller',((caller(1))[3]||'main'),@_));
+  carp("Password entry fields are not supported by GDialog.");
+  return(1); #: Cancel every time.
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
