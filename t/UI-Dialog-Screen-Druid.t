@@ -1,25 +1,16 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 1.t'
-
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-use Test::More ( skip_all => "Skipped until better tests are written." );
-
-# use Test::More ( tests => 4 );
-# BEGIN { use_ok( 'UI::Dialog::Screen::Druid' ); }
-# require_ok( 'UI::Dialog::Screen::Druid' );
+use Test::More;
+BEGIN { use_ok( 'UI::Dialog::Screen::Druid' ); }
+require_ok( 'UI::Dialog::Screen::Druid' );
 
 # #########################
 
-# # Insert your test code below, the Test::More module is use()ed here so read
-# # its man page ( perldoc Test::More ) for help writing this test script.
+my $obj = UI::Dialog::Screen::Druid->new();
+isa_ok( $obj, 'UI::Dialog::Screen::Druid' );
 
-# my $obj = UI::Dialog::Screen::Druid->new();
-# isa_ok( $obj, 'UI::Dialog::Screen::Druid' );
-
-# my @methods = qw( new run loop is_looping break_loop
-#                   add_menu_item get_menu_items del_menu_item set_menu_item
-#                  );
-# can_ok( 'UI::Dialog::Screen::Druid', @methods );
+my @methods =
+  qw( perform new
+      add_input_step add_password_step
+      add_menu_step add_yesno_step
+   );
+can_ok( 'UI::Dialog::Screen::Druid', @methods );
+done_testing();

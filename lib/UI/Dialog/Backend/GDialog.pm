@@ -137,21 +137,17 @@ sub yesno {
     );
 
   my $rv = $self->command_state($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
   if ($rv && $rv >= 1) {
-		$self->ra("NO");
-		$self->rs("NO");
-		$this_rv = 0;
-  }
-  else {
-		$self->ra("YES");
-		$self->rs("YES");
-		$this_rv = 1;
+    $self->ra("NO");
+    $self->rs("NO");
+    $self->rv($rv);
+  } else {
+    $self->ra("YES");
+    $self->rs("YES");
+    $self->rv('null');
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -176,27 +172,13 @@ sub inputbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($text);
-		$self->rs($text);
-		$this_rv = $text;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $text : 0);
 }
 #: password boxes aren't supported by gdialog
 sub password {
-  my $self = shift();
-  $self->msgbox(text=> 'GDialog does not support passwords at all, '.
-                'you will see the text as you type in the next dialog.' );
-  return($self->inputbox('caller',((caller(1))[3]||'main'),@_));
+  carp("Password entry fields are not supported by GDialog.");
+  return(1); #: Cancel every time.
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -226,18 +208,8 @@ sub msgbox {
     );
 
   my $rv = $self->command_state($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub infobox {
   my $self = shift();
@@ -265,20 +237,8 @@ sub textbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($text);
-		$self->rs($text);
-		$this_rv = $text;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -304,20 +264,8 @@ sub menu {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -337,7 +285,8 @@ sub checklist {
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--separate-output');
-  if ($args->{radiolist} == 1) {
+  $args->{radiolist} ||= 0;
+  if ($args->{radiolist}) {
     $fmt = $self->append_format($fmt,'--radiolist');
   }
   else {
@@ -350,22 +299,12 @@ sub checklist {
       listheight => $self->make_kvl($args,$args->{'listheight'})
     );
 
+  if ($args->{radiolist}) {
+    my ($rv,$selected) = $self->command_string($command);
+    return($rv == 0 ? $selected : 0);
+  }
   my ($rv,$selected) = $self->command_array($command);
-  $self->rv($rv||'null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->ra('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->rs(join("\n",@$selected));
-		$self->ra(@$selected);
-		$this_rv = $selected;
-  }
-  $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? @{$selected} : 0);
 }
 #: a radio button list
 sub radiolist {

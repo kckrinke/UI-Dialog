@@ -2,178 +2,197 @@
 use strict;
 use warnings;
 use diagnostics;
+use Time::HiRes qw(usleep);
+
+# demo helper
+sub printerr { print STDERR "\n".'UI::Dialog : '.join( " ", @_ )."\n"; sleep(1); }
 
 use UI::Dialog::Backend::KDialog;
+my $d = new UI::Dialog::Backend::KDialog
+  ( title => "KDialog  Demo",
+    height => 16, width => 65,
+    listheight => 5,
+    debug => 1,
+    test_mode => 0,
+  );
 
-sub printerr { print STDERR 'UI::Dialog : '.join( " ", @_ ); }
-sub CB_CANCEL {
-    my $args = shift();
-    my $func = $args->{'caller'};
-    printerr("CB_CANCEL > ".$func." (This is executed when the user presses the CANCEL button.)\n");
-}
-sub CB_OK {
-    my $args = shift();
-    my $func = $args->{'caller'};
-    printerr("CB_OK > ".$func." (This is executed when the user presses the OK button.)\n");
-}
-sub CB_ESC {
-    my $args = shift();
-    my $func = $args->{'caller'};
-    printerr("CB_ESC > ".$func." (This is executed when the user presses the ESC button.)\n");
-}
-sub CB_PRE {
-    my $args = shift();
-    my $func = $args->{'caller'};
-    sleep(1); # we wait for a second so that the user can digest STDERR before the next widget...
-    printerr("CB_PRE > ".$func." (This is executed before any widget does anything.)\n");
-}
-sub CB_POST {
-    my $args = shift();
-    my $func = $args->{'caller'};
-    my $state = shift()||'NULL';
-    printerr("CB_POST > ".$func." > ".$state." (This is executed after any widget has completed it's run.)\n");
-}
-
-my $d = new UI::Dialog::Backend::KDialog ( title => "UI::Dialog::Backend::KDialog Demo",
-										   debug => 0, height => 20, width => 65, listheight => 10,
-										   callbacks => { CANCEL => \&CB_CANCEL,
-														  ESC => \&CB_ESC,
-														  OK => \&CB_OK,
-														  PRE => \&CB_PRE,
-														  POST => \&CB_POST } );
-
-sub CALLBACK_TEST {
-    $d->msgbox( title => '$d->msgbox()',
-				text =>  'This is a test of the callback functionality. '.
-				'On the console STDERR output you should see "CB_PRE > main::CALLBACK_TEST". '.
-				'This is because this msgbox() widget has been called from a function named CALLBACK_TEST.' );
-}
-CALLBACK_TEST();
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$d->msgbox( title => '$d->msgbox()',
-			text =>  'This is the msgbox widget. ' .
-			'There should be a single "OK" button below this text message, ' .
-			'and the title of this message box should be "$d->msgbox()".' );
-$d->sorry( title => '$d->sorry()',
-		   text =>  'This is the sorry widget. ' .
-		   'There should be a single "OK" button below this text message, ' .
-		   'and the title of this message box should be "$d->sorry()".' );
-$d->error( title => '$d->error()',
-		   text =>  'This is the error widget. ' .
-		   'There should be a single "OK" button below this text message, ' .
-		   'and the title of this message box should be "$d->error()".' );
+# placeholder variable
+our $text;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if ($d->yesno( title => '$d->yesno()',
-			   text => 'This is a question widget. '.
-			   'There should be "YES" and "NO" buttons below this text message. '.
-			   'and the title of this message box should be "$d->yesno()".' )) {
-    printerr("The user has answered YES to the yesno widget.\n");
+$text =
+  q{This is a "yesno" question widget. There should be "YES" and "NO" buttons below this text message. The title of this message box should be "$d->yesno()".};
+my $is_yes = $d->yesno( title => '$d->yesno()', text => $text );
+if ($d->state() eq "OK" && $is_yes) {
+  printerr("The user has answered YES to the yesno widget.");
 } else {
-    printerr("The user has answered NO to the yesno widget.\n");
-}
-if ($d->yesnocancel( title => '$d->yesnocancel()',
-					 text => 'This is a question widget. '.
-					 'There should be "YES", "NO" and "CANCEL" buttons below this text message. '.
-					 'and the title of this message box should be "$d->yesnocancel()".' )) {
-    printerr("The user has answered YES to the yesnocancel widget.\n");
-} else {
-    printerr("The user has answered NO to the yesnocancel widget.\n");
-}
-if ($d->warningyesno( title => '$d->warningyesno()',
-					  text => 'This is a question widget. '.
-					  'There should be "YES" and "NO" buttons below this text message. '.
-					  'and the title of this message box should be "$d->warningyesno()".' )) {
-    printerr("The user has answered YES to the warningyesno widget.\n");
-} else {
-    printerr("The user has answered NO to the warningyesno widget.\n");
-}
-if ($d->warningyesnocancel( title => '$d->warningyesnocancel()',
-							text => 'This is a question widget. '.
-							'There should be "YES", "NO" and "CANCEL" buttons below this text message. '.
-							'and the title of this message box should be "$d->warningyesnocancel()".' )) {
-    printerr("The user has answered YES to the warningyesnocancel widget.\n");
-} else {
-    printerr("The user has answered NO to the warningyesnocancel widget.\n");
+  printerr("The user has answered NO or pressed ESC to the yesno widget.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $inputbox = $d->inputbox( title => '$d->inputbox()',
-							 text => 'Please enter some text below:',
-                             entry => 'preset text entry' );
+$text =
+  q{This is a "yesnocancel" question widget. There should be "YES", "NO" and "CANCEL" buttons below this text message. The title of this message box should be "$d->yesno()".};
+$is_yes = $d->yesnocancel( title => '$d->yesnocancel()', text => $text );
+if ($d->state() eq "OK" && $is_yes) {
+  printerr("The user has answered YES to the yesnocancel widget.");
+} else {
+  printerr("The user has answered NO or pressed ESC to the yesnocancel widget.");
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$text =
+  q{This is a "warningyesno" question widget. There should be "YES" and "NO" buttons below this text message and a warning icon to the left. The title of this message box should be "$d->warningyesno()".};
+$is_yes = $d->warningyesno( title => '$d->warningyesno()', text => $text );
+if ($d->state() eq "OK" && $is_yes) {
+  printerr("The user has answered YES to the warningyesno widget.");
+} else {
+  printerr("The user has answered NO or pressed ESC to the warningyesno widget.");
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$text =
+  q{This is a "warningyesnocancel" question widget. There should be "YES", "NO" and "CANCEL" buttons below this text message and a warning icon to the left. The title of this message box should be "$d->warningyesnocancel()".};
+$is_yes = $d->warningyesnocancel
+  ( title => '$d->warningyesnocancel()',
+    text => $text
+  );
+if ($d->state() eq "OK" && $is_yes) {
+  printerr("The user has answered YES to the warningyesnocancel widget.");
+} else {
+  printerr("The user has answered NO or pressed ESC to the warningyesnocancel widget.");
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$text =
+  q{This is the msgbox widget. There should be a single "OK" button below this text message and the title of this message box should be "msgbox".};
+$d->msgbox( title => 'msgbox', text =>  $text );
 if ($d->state() eq "OK") {
-    print "You input: ".($inputbox||'NULL')."\n";
+  printerr("The user pressed OK.");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $password = $d->password( title => '$d->password()',
-							 text => 'Please input text below: (text should be hidden)' );
+$text =
+  q{This is an infobox widget. There should be a single "OK" button below this text message and the title of this message box should be "$d->infobox()". Unlike other implementations, this infobox does not pause for any time and is essentially a messagebox at heart.};
+$d->infobox( timeout => 3000, title => '$d->infobox()', text => $text);
 if ($d->state() eq "OK") {
-    print "You input: ".($password||'NULL')."\n";
+  printerr("The user pressed OK.");
+} else {
+  printerr("The user pressed ESC or CTRL+C.");
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$text =
+  q{This is a password input box. The field below should be pre-populated with the words "insecure password entry" but displayed as asterisks for each character. Providing "entry" text to a password field is inherently insecure.};
+my $password = $d->password
+  ( title => '$d->password()',
+    text => $text,
+    entry => 'insecure password entry',
+  );
+if ($d->state() eq "OK") {
+  printerr( "You input: ".($password||'NULL'));
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$text =
+  q{This is a text input box. The field below should be pre-populated with the words "preset text entry".};
+my $user_input = $d->inputbox
+  ( title => '$d->inputbox()', text => $text, entry => 'preset text entry' );
+if ($d->state() eq "OK") {
+  printerr( "You input: ".($user_input||'NULL') );
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $d->textbox( title => '$d->textbox()', path => $0 );
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $menuSelect = $d->menu( title => '$d->menu()', text=>'select:',
-						   list => [ 'Test', 'testing',
-									 'Kd', 'kdialog' ] );
 if ($d->state() eq "OK") {
-    print "You selected: '".($menuSelect||'NULL')."'\n";
+  printerr("The user pressed EXIT.");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of EXIT.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my @checkSelect = $d->checklist( title => '$d->checklist()',
-								 text => 'select:',
-								 list => [ 'Test', [ 'testing', 1 ],
-										   'Kd', [ 'kdialog', '0' ] ] );
+$text =
+  q{This text is in the second column of the first row of a menu list dialog. The title should be "$d->menu()" and there should be two items in the list. "Test" with the label "testing" and "WT" with the label "Whiptail".};
+my $menuSelect = $d->menu
+  ( title => '$d->menu()',
+    text => $text,
+    list =>
+    [ 'Test', 'testing',
+      'WT', 'Whiptail'
+    ]
+  );
 if ($d->state() eq "OK") {
-    print "You selected: '".(join("' '",@checkSelect))."'\n";
+  printerr( "You selected: '".($menuSelect||'NULL')."'\n");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $radioSelect = $d->radiolist( title => '$d->radiolist()',
-								 text => 'select:',
-								 list =>[ 'test', [ 'testing', 0 ],
-										  'Kd', [ 'kdialog', 1 ] ]);
+$text =
+  q{This text is in the third column of the first row of a checklist dialog. The title should be "$d->checklist()" and there should be two items in the list. "Test" with the label "testing" (already selected) and "WT" with the label "Whiptail" (not selected).};
+my @checkSelect = $d->checklist
+  ( title => '$d->checklist()',
+    text => $text,
+    list =>
+    [ 'Test', [ 'testing', 1 ],
+      'WT', [ 'Whiptail', '0' ]
+    ]
+  );
 if ($d->state() eq "OK") {
-    print "You selected: '".$radioSelect."'\n";
+  printerr( "You selected: '".(join("' '",@checkSelect))."'");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $dirname = $d->getexistingdirectory( title => '$d->getexistingdirectory()',
-										path => "/" );
+$text =
+  q{This text is in the third column of the first row of a radiolist dialog. The title should be "$d->radiolist()" and there should be two items in thbe list. "Test" with the label "testing" (not selected) and "WT" with the label "Whiptail" (already selected).};
+my $radioSelect = $d->radiolist
+  ( title => '$d->radiolist()',
+    text => $text,
+    list =>
+    [ 'test',[ 'testing', 0 ],
+      'WT', [ 'Whiptail', 1 ]
+    ]
+  );
 if ($d->state() eq "OK") {
-    print "You selected: '".$dirname."'\n";
+  printerr( "You selected: '".$radioSelect."'");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $openfilename = $d->getopenfilename( title => '$d->getopenfilename()',
-										path => $dirname );
+$text =
+  q{The next screen is a file selection widget. The title should be "$d->fselect()" and the starting path should be this script file. Should only let you select files and not directories.};
+$d->msgbox(text=>$text);
+my $filename = $d->fselect
+  ( title => '$d->fselect()',
+    height => 10,
+    path => $0,
+  );
 if ($d->state() eq "OK") {
-    print "You selected: '".$openfilename."'\n";
-}
-my $savefilename = $d->getsavefilename( title => '$d->getopenfilename()',
-										path => $dirname );
-if ($d->state() eq "OK") {
-    print "You selected: '".$savefilename."'\n";
+  printerr( "You selected: '".$filename."'");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my $openurl = $d->getopenurl( title => '$d->getopenurl()',
-							  path => $dirname );
+$text =
+  q{The next screen is a path selection widget. The title should be "$d->dselect()" and the starting path should be this script file. Should not let you select files, only directories.};
+$d->msgbox(text=>$text);
+my $dirname = $d->dselect
+  ( title => '$d->dselect()',
+    height => 10,
+    path => $0,
+  );
 if ($d->state() eq "OK") {
-    print "You selected: '".$openurl."'\n";
-}
-my $saveurl = $d->getsaveurl( title => '$d->getopenurl()',
-							  path => $dirname );
-if ($d->state() eq "OK") {
-    print "You selected: '".$saveurl."'\n";
+  printerr( "You selected: '".$dirname."'");
+} else {
+  printerr("The user pressed CTRL+C or ESC instead of OK.");
 }
 
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 exit();
-
-
-

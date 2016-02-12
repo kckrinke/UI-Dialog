@@ -84,51 +84,12 @@ sub new {
 		croak("the kdialog binary could not be found at: ".$self->{'_opts'}->{'bin'});
   }
 
-  $self->{'_opts'}->{'trust-input'} =
-    ( exists $cfg->{'trust-input'}
-      && $cfg->{'trust-input'}==1
-    ) ? 1 : 0;
+  $self->{'_opts'}->{'trust-input'} = $cfg->{'trust-input'} || 0;
+
+  $self->{'test_mode'} = $cfg->{'test_mode'} if exists $cfg->{'test_mode'};
+  $self->{'test_mode_result'} = '';
 
   return($self);
-}
-
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#: Override Inherited Methods
-#:
-
-#: execute a simple command (return the exit code only);
-sub command_state {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  $self->_debug("command: ".$cmnd,1);
-  system($cmnd . "> /dev/null 2> /dev/null");
-  my $rv = $? >> 8;
-  $self->_debug("command rv: ".$rv,2);
-  return($rv);
-}
-
-#: execute a command and return the exit code and one-line SCALAR
-sub command_string {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  $self->_debug("command: ".$cmnd,1);
-  chomp(my $text = `$cmnd 2> /dev/null`);
-  my $rv = $? >> 8;
-  $self->_debug("command rs: ".$rv." '".$text."'",2);
-  return($text) unless defined wantarray;
-  return (wantarray) ? ($rv,$text) : $text;
-}
-
-#: execute a command and return the exit code and ARRAY of data
-sub command_array {
-  my $self = $_[0];
-  my $cmnd = $_[1];
-  $self->_debug("command: ".$cmnd,1);
-  chomp(my $text = `$cmnd 2> /dev/null`);
-  my $rv = $? >> 8;
-  $self->_debug("command ra: ".$rv." '".$text."'",2);
-  return([split(/\n/,$text)]) unless defined wantarray;
-  return (wantarray) ? ($rv,[split(/\n/,$text)]) : [split(/\n/,$text)];
 }
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -137,7 +98,6 @@ sub command_array {
 
 sub append_format_base {
   my ($self,$args,$fmt) = @_;
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
   $fmt = $self->append_format_check($args,$fmt,'caption','--caption {{caption}}');
   $fmt = $self->append_format_check($args,$fmt,'icon','--icon {{icon}}');
   $fmt = $self->append_format_check($args,$fmt,'miniicon','--miniicon {{miniicon}}');
@@ -145,7 +105,7 @@ sub append_format_base {
     delete $args->{'separate-output'};
   }
   else {
-    $fmt = $self->append_format_check($args,$fmt,"separate-output","--separate-output")
+    $fmt = $self->append_format_check($args,$fmt,"separate-output","--separate-output");
   }
   return $fmt;
 }
@@ -177,22 +137,17 @@ sub yesno {
     );
 
   my $rv = $self->command_state($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
   if ($rv && $rv >= 1) {
-		$self->ra("NO");
-		$self->rs("NO");
-		$this_rv = 0;
-  }
-  else {
-		$self->ra("YES");
-		$self->rs("YES");
-    $this_rv = 1;
+    $self->ra("NO");
+    $self->rs("NO");
+    $self->rv($rv);
+  } else {
+    $self->ra("YES");
+    $self->rs("YES");
+    $self->rv('null');
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub yesnocancel {
   my $self = shift();
@@ -239,20 +194,8 @@ sub inputbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($text);
-		$self->rs($text);
-		$this_rv = $text;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $text : 0);
 }
 sub password {
   my $self = shift();
@@ -281,18 +224,8 @@ sub msgbox {
     );
 
   my $rv = $self->command_state($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub error {
   my $self = shift();
@@ -301,6 +234,10 @@ sub error {
 sub sorry {
   my $self = shift();
   return($self->msgbox('caller',((caller(1))[3]||'main'),@_,'msgbox','sorry'));
+}
+sub infobox {
+  my $self = shift();
+  return($self->msgbox('caller',((caller(1))[3]||'main'),@_,'msgbox','msgbox'));
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -324,18 +261,8 @@ sub textbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -360,20 +287,8 @@ sub menu {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -392,7 +307,8 @@ sub checklist {
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  if ($args->{radiolist} == 1) {
+  $args->{radiolist} ||= 0;
+  if ($args->{radiolist}) {
     $fmt = $self->append_format($fmt,'--radiolist');
   }
   else {
@@ -405,22 +321,12 @@ sub checklist {
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
+  if ($args->{radiolist}) {
+    my ($rv,$selected) = $self->command_string($command);
+    return($rv == 0 ? $selected : 0);
+  }
   my ($rv,$selected) = $self->command_array($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
-  $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? @{$selected} : 0);
 }
 #: a radio button list
 sub radiolist {
@@ -454,24 +360,12 @@ sub fselect {
   my $command = $self->prepare_command
     ( $args, $fmt,
       path => $self->make_kvl($args,($args->{'path'}||abs_path())),
-      filter => ($args->{'filter'}||'*')
+      filter => $self->make_kvl($args,($args->{'filter'}||'*'))
     );
 
-  my ($rv,$file) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$self->rs('null');
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($file);
-		$self->rs($file);
-		$this_rv = $file;
-  }
+  my ($rv,$selected) = $self->command_string($command);
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 sub getopenfilename {
   my $self = shift();

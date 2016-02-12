@@ -546,7 +546,8 @@ sub checklist {
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  if (exists $args->{radiolist} && $args->{radiolist} == 1) {
+  $args->{radiolist} ||= 0;
+  if ($args->{radiolist}) {
     $fmt = $self->append_format($fmt,'--radiolist');
   }
   else {
@@ -559,7 +560,7 @@ sub checklist {
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
-  if (exists $args->{radiolist} && $args->{radiolist} == 1) {
+  if ($args->{radiolist}) {
     my ($rv,$selected) = $self->command_string($command);
     return($rv == 0 ? $selected : 0);
   }
