@@ -23,6 +23,7 @@ use Carp;
 use FileHandle;
 use File::Basename;
 use Cwd qw( abs_path );
+use String::ShellQuote;
 use UI::Dialog::Backend;
 
 BEGIN {
@@ -43,6 +44,8 @@ sub new {
   bless($self, $class);
   $self->{'_state'} = {};
   $self->{'_opts'} = {};
+  $self->{'test_mode'} = ($cfg->{'test_mode'}) ? 1 : 0;
+  $self->{'test_mode_result'} = '';
 
 	#: Dynamic path discovery...
 	my $CFG_PATH = $cfg->{'PATH'};
@@ -165,8 +168,14 @@ sub new {
   #: to determin upper limits use:
   #  --print-maxsize
   #: STDOUT| MaxSize: \d+(width), \d+(height)
-  $self->{'_opts'}->{'width'} = $cfg->{'width'} || 0;
-  $self->{'_opts'}->{'height'} = $cfg->{'height'} || 0;
+  my $command = $self->{'_opts'}->{'bin'}." --print-maxsize";
+  my $raw = `$command 2>&1`;
+  my ($w,$h) = (0,0);
+  if ($raw =~ m!^\s*MaxSize\:\s+(\d+?),\s+(\d+?)\s*$!) {
+    ($w,$h) = ($1,$2);
+  }
+  $self->{'_opts'}->{'width'}  = $cfg->{'width'}  || $w;
+  $self->{'_opts'}->{'height'} = $cfg->{'height'} || $h;
   $self->{'_opts'}->{'listheight'} = $cfg->{'listheight'} || $cfg->{'menuheight'} || 5;
   $self->{'_opts'}->{'percentage'} = $cfg->{'percentage'} || 1;
 
@@ -176,10 +185,7 @@ sub new {
   $self->{'_opts'}->{'timeout'} = $cfg->{'timeout'} || 0;
   $self->{'_opts'}->{'wait'} = $cfg->{'wait'} || 0;
 
-  $self->{'_opts'}->{'trust-input'} =
-    ( exists $cfg->{'trust-input'}
-      && $cfg->{'trust-input'}==1
-    ) ? 1 : 0;
+  $self->{'_opts'}->{'trust-input'} = $cfg->{'trust-input'} || 0;
 
   return($self);
 }
@@ -214,78 +220,92 @@ sub _del_gauge {
 
 sub append_format_base {
   my ($self,$args,$fmt) = @_;
-  $fmt = $self->append_format_check($args,$fmt,'title','--title {{title}}');
   $fmt = 'XDIALOG_HIGH_DIALOG_COMPAT="1" ' . $fmt
     if $args->{'XDIALOG_HIGH_DIALOG_COMPAT'};
+  $fmt = $self->append_format_check($args,$fmt,"editable","--editable");
+  $fmt = $self->append_format_check($args,$fmt,"center","--center");
+  $fmt = $self->append_format_check($args,$fmt,"right","--right");
+  $fmt = $self->append_format_check($args,$fmt,"left","--left");
+  $fmt = $self->append_format_check($args,$fmt,"fill","--fill");
+  $fmt = $self->append_format_check($args,$fmt,"wrap","--wrap");
+  $fmt = $self->append_format_check($args,$fmt,"crwrap","--crwrap");
+  $fmt = $self->append_format_check($args,$fmt,"nocrwrap","--nocrwrap");
+  $fmt = $self->append_format_check($args,$fmt,"reverse","--reverse");
+  $fmt = $self->append_format_check($args,$fmt,"wizard","--wizard");
+  $fmt = $self->append_format_check($args,$fmt,"smooth","--smooth");
+  $fmt = $self->append_format_check($args,$fmt,'backtitle','--backtitle {{backtitle}}');
+  $args->{'no-wrap'} ||= $args->{'nowrap'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"no-wrap","--no-wrap");
+  $args->{'allow-close'} ||= $args->{'allowclose'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"allow-close","--allow-close");
+  $args->{'no-close'} ||= $args->{'noclose'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"no-close","--no-close");
+  $args->{'screen-center'} ||= $args->{'screencenter'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"screen-center","--screen-center");
+  $args->{'under-mouse'} ||= $args->{'undermouse'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"under-mouse","--under-mouse");
+  $args->{'auto-placement'} ||= $args->{'autoplacement'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"auto-placement","--auto-placement");
+  $args->{'fixed-font'} ||= $args->{'fixedfont'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"fixed-font","--fixed-font");
+  $args->{'time-stamp'} ||= $args->{'timestamp'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"time-stamp","--time-stamp");
+  $args->{'date-stamp'} ||= $args->{'datestamp'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"date-stamp","--date-stamp");
+  $args->{'keep-colors'} ||= $args->{'keep-colours'}
+    || $args->{'keepcolors'} || $args->{'keepcolours'};
+  $fmt = $self->append_format_check($args,$fmt,"keep-colors","--keep-colors");
+  $args->{'no-tags'} ||= $args->{'notags'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"no-tags","--no-tags");
+  $args->{'item-help'} ||= $args->{'itemhelp'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"item-help","--item-help");
+  $args->{'no-ok'} ||= $args->{'nook'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"no-ok","--no-ok");
+  $args->{'no-cancel'} ||= $args->{'nocancel'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"no-cancel","--no-cancel");
+  $args->{'no-buttons'} ||= $args->{'nobuttons'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"no-buttons","--no-buttons");
+  $args->{'default-no'} ||= $args->{'defaultno'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"default-no","--default-no");
+  $args->{'ignore-eof'} ||= $args->{'ignoreeof'} || 0;
+  $fmt = $self->append_format_check($args,$fmt,"ignore-eof","--ignore-eof");
 
-  $fmt->append_format_check($args,$fmt,"editable","--editable");
-  $fmt->append_format_check($args,$fmt,"center","--center");
-  $fmt->append_format_check($args,$fmt,"right","--right");
-  $fmt->append_format_check($args,$fmt,"left","--left");
-  $fmt->append_format_check($args,$fmt,"fill","--fill");
-  $fmt->append_format_check($args,$fmt,"wrap","--wrap");
-  $fmt->append_format_check($args,$fmt,"crwrap","--crwrap");
-  $fmt->append_format_check($args,$fmt,"nocrwrap","--nocrwrap");
-  $fmt->append_format_check($args,$fmt,"reverse","--reverse");
-  $fmt->append_format_check($args,$fmt,"wizard","--wizard");
-  $fmt->append_format_check($args,$fmt,"smooth","--smooth");
+  $fmt = $self->append_format_check($args,$fmt,"wmclass","--wmclass {{wmclass}}");
+  $fmt = $self->append_format_check($args,$fmt,"interval","--interval {{interval}}");
+  $fmt = $self->append_format_check($args,$fmt,"icon","--icon {{icon}}");
+  $fmt = $self->append_format_check($args,$fmt,"help","--help {{help}}");
+  $fmt = $self->append_format_check($args,$fmt,"print","--print {{print}}");
+  $fmt = $self->append_format_check($args,$fmt,"check",'--check {{check}}');
 
-  $args->{'no-wrap'} ||= $args->{'nowrap'};
-  $fmt->append_format_check($args,$fmt,"no-wrap","--no-wrap");
-  $args->{'allow-close'} ||= $args->{'allowclose'};
-  $fmt->append_format_check($args,$fmt,"allow-close","--allow-close");
-  $args->{'no-close'} ||= $args->{'noclose'};
-  $fmt->append_format_check($args,$fmt,"no-close","--no-close");
-  $args->{'screen-center'} ||= $args->{'screencenter'};
-  $fmt->append_format_check($args,$fmt,"screen-center","--screen-center");
-  $args->{'under-mouse'} ||= $args->{'undermouse'};
-  $fmt->append_format_check($args,$fmt,"under-mouse","--under-mouse");
-  $args->{'auto-placement'} ||= $args->{'autoplacement'};
-  $fmt->append_format_check($args,$fmt,"auto-placement","--auto-placement");
-  $args->{'fixed-font'} ||= $args->{'fixedfont'};
-  $fmt->append_format_check($args,$fmt,"fixed-font","--fixed-font");
-  $args->{'time-stamp'} ||= $args->{'timestamp'};
-  $fmt->append_format_check($args,$fmt,"time-stamp","--time-stamp");
-  $args->{'date-stamp'} ||= $args->{'datestamp'};
-  $fmt->append_format_check($args,$fmt,"date-stamp","--date-stamp");
-  $args->{'keep-colors'} ||= $args->{'keep-colours'} || $args->{'keepcolors'} || $args->{'keepcolours'};
-  $fmt->append_format_check($args,$fmt,"keep-colors","--keep-colors");
-  $args->{'no-tags'} ||= $args->{'notags'};
-  $fmt->append_format_check($args,$fmt,"no-tags","--no-tags");
-  $args->{'item-help'} ||= $args->{'itemhelp'};
-  $fmt->append_format_check($args,$fmt,"item-help","--item-help");
-  $args->{'no-ok'} ||= $args->{'nook'};
-  $fmt->append_format_check($args,$fmt,"no-ok","--no-ok");
-  $args->{'no-cancel'} ||= $args->{'nocancel'};
-  $fmt->append_format_check($args,$fmt,"no-cancel","--no-cancel");
-  $args->{'no-buttons'} ||= $args->{'nobuttons'};
-  $fmt->append_format_check($args,$fmt,"no-buttons","--no-buttons");
-  $args->{'default-no'} ||= $args->{'defaultno'};
-  $fmt->append_format_check($args,$fmt,"default-no","--default-no");
-  $args->{'ignore-eof'} ||= $args->{'ignoreeof'};
-  $fmt->append_format_check($args,$fmt,"ignore-eof","--ignore-eof");
+  $args->{'rc-file'} ||= $args->{'rcfile'} || 0;
+  $fmt = $self->append_format_check
+    ( $args, $fmt, "rc-file",
+      '--rc-file '.shell_quote($args->{'rc-file'})
+    );
 
-  $fmt->append_format_check($args,$fmt,"wmclass","--wmclass {{wmclass}}");
-  $fmt->append_format_check($args,$fmt,"title","--title {{title}}");
-  $fmt->append_format_check($args,$fmt,"backtitle","--backtitle {{backtitle}}");
-  $fmt->append_format_check($args,$fmt,"interval","--interval {{interval}}");
-  $fmt->append_format_check($args,$fmt,"icon","--icon {{icon}}");
-  $fmt->append_format_check($args,$fmt,"help","--help {{help}}");
-  $fmt->append_format_check($args,$fmt,"print","--print {{print}}");
-  $fmt->append_format_check($args,$fmt,"check",'--check {{check}}');
+  $args->{'button-style'} ||= $args->{'buttonsstyle'} || 0;
+  $fmt = $self->append_format_check
+    ( $args, $fmt, "button-style",
+      '--button-style '.shell_quote($args->{'button-style'})
+    );
 
-  $args->{'rc-file'} ||= $args->{'rcfile'};
-  $fmt->append_format($fmt,'--rc-file "'.$args->{'rc-file'}.'"')
-    unless not -r $args->{'rc-file'};
+  $args->{'default-item'} ||= $args->{'defaultitem'} || 0;
+  $fmt = $self->append_format_check
+    ( $args, $fmt, "default-item",
+      '--default-item '.shell_quote($args->{'default-item'})
+    );
 
-  $args->{'button-style'} ||= $args->{'buttonsstyle'};
-  $fmt->append_format_check($args,$fmt,"button-style",'--button-style "'.$args->{'button-style'}.'"');
-  $args->{'default-item'} ||= $args->{'defaultitem'};
-  $fmt->append_format_check($args,$fmt,"default-item",'--default-item "'.$args->{'default-item'}.'"');
-  $args->{'ok-label'} ||= $args->{'oklabel'};
-  $fmt->append_format_check($args,$fmt,"ok-label",'--ok-label "'.$args->{'ok-label'}.'"');
-  $args->{'cancel-label'} ||= $args->{'cancellabel'};
-  $fmt->append_format_check($args,$fmt,"cancel-label",'--cancel-label "'.$args->{'cancel-label'}.'"');
+  $args->{'ok-label'} ||= $args->{'oklabel'} || 0;
+  $fmt = $self->append_format_check
+    ( $args, $fmt, "ok-label",
+      '--ok-label '.shell_quote($args->{'ok-label'})
+    );
+
+  $args->{'cancel-label'} ||= $args->{'cancellabel'} || 0;
+  $fmt = $self->append_format_check
+    ( $args, $fmt, "cancel-label",
+      '--cancel-label '.shell_quote($args->{'cancel-label'})
+    );
 
   if (exists $args->{'begin'}) {
     my $begin = $args->{'begin'};
@@ -355,21 +375,8 @@ sub combobox {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv ? $selected : 0);
 }
 
 
@@ -385,7 +392,6 @@ sub rangebox {
   }
   my $args = $self->_pre($caller,@_);
 
-
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--rangebox {{text}} {{height}} {{width}} {{min}} {{max}} {{def}}');
@@ -398,21 +404,8 @@ sub rangebox {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv ? $selected : 0);
 }
 
 #  --2rangesbox  <text> <height> <width> <label1> <min1> <max1> <def1> <label2> <min2> <max2> <def2>
@@ -446,22 +439,9 @@ sub rangesbox2 {
     );
 
   my ($rv,$selected) = $self->command_array($command);
-
-  $self->rv($rv||'null');
-  $self->rs('null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 
 #  --3rangesbox  <text> <height> <width> <label1> <min1> <max1> <def1> <label2> <min2> <max2> <def2> <label3> <min3> <max3> <def3>
@@ -500,22 +480,9 @@ sub rangesbox3 {
     );
 
   my ($rv,$selected) = $self->command_array($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 
 #  --spinbox     <text> <height> <width> <min> <max> <def> <label>
@@ -548,21 +515,8 @@ sub spinbox {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #  --2spinsbox   <text> <height> <width> <min1> <max1> <def1> <label1> <min2> <max2> <def2> <label2>
@@ -596,22 +550,9 @@ sub spinsbox2 {
     );
 
   my ($rv,$selected) = $self->command_array($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 
 #  --3spinsbox   <text> <height> <width> <text> <height> <width> <min1> <max1> <def1> <label1> <min2> <max2> <def2> <label2> <min3> <max3> <def3> <label3>
@@ -650,22 +591,9 @@ sub spinsbox3 {
     );
 
   my ($rv,$selected) = $self->command_array($command);
-
-  $self->rv($rv||'null');
-  $self->rs('null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 
 #  --buildlist   <text> <height> <width> <list height> <tag1> <item1> <status1> {<help1>}...
@@ -693,22 +621,9 @@ sub buildlist {
     );
 
   my ($rv,$selected) = $self->command_array($command);
-
-  $self->rv($rv||'null');
-  $self->rs('null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 
 #  --treeview    <text> <height> <width> <list height> <tag1> <item1> <status1> <item_depth1> {<help1>}...
@@ -736,21 +651,8 @@ sub treeview {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #  --calendar    <text> <height> <width> <day> <month> <year>
@@ -776,22 +678,13 @@ sub calendar {
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
-  my ($rv,$selected) = $self->command_string($command);
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		chomp($selected);
-		$self->ra(split(/\//,$selected));
-		$self->rs($selected);
-		$this_rv = $selected;
+  my ($rv,$date) = $self->command_string($command);
+  if ($rv == 0) {
+    $self->ra(split(m!/!,$date));
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $date : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0,0,0));
 }
 
 #  --timebox     <text> <height> <width>
@@ -808,28 +701,19 @@ sub timebox {
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  $fmt = $self->append_format($fmt,'--separate-output --timebox {{text}} {{height}} {{width}}');
+  $fmt = $self->append_format($fmt,'--separate-output --timebox {{text}} {{height}} {{width}} {{hour}} {{minute}} {{second}}');
   my $command = $self->prepare_command
     ( $args, $fmt,
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
-  my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(split(/\:/,$selected));
-		$self->rs($selected);
-		$this_rv = $selected;
+  my ($rv,$time) = $self->command_string($command);
+  if ($rv == 0) {
+    $self->ra(split(m!\:!,$time));
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $time : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0,0,0));
 }
 
 #  --yesno       <text> <height> <width>
@@ -853,21 +737,15 @@ sub yesno {
     );
 
   my $rv = $self->command_state($command);
-
-  $self->rv($rv||'null');
-  my $this_rv;
   if ($rv && $rv >= 1) {
-		$self->ra("NO");
-		$self->rs("NO");
-		$this_rv = 0;
-  }
-  else {
-		$self->ra("YES");
-		$self->rs("YES");
-		$this_rv = 1;
+    $self->ra("NO");
+    $self->rs("NO");
+  } else {
+    $self->ra("YES");
+    $self->rs("YES");
   }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #  --inputbox    <text> <height> <width> [<init>]
@@ -883,29 +761,38 @@ sub inputbox {
     shift(); $caller = shift();
   }
   my $args = $self->_pre($caller,@_);
-  my $val = $args->{'inputs'} || $args->{'password'} || 1;
+  my $num_fields = $args->{'inputs'} || $args->{'password'} || 1;
 
   my $fmt = $self->prepare_format($args);
   $fmt = $self->append_format_base($args,$fmt);
-  if ($val > 1) {
+  if ($num_fields > 1) {
     $fmt = $self->append_format($fmt,'--separate-output');
   }
   $fmt = $self->append_format_check($args,$fmt,'password','--password');
-  $fmt = $self->append_format_check($args,$fmt,'password','--password') if $val > 1;
-  $fmt = $self->append_format_check($args,$fmt,'password','--password') if $val > 2;
+  $fmt = $self->append_format_check($args,$fmt,'password','--password')
+    if $num_fields > 1;
+  $fmt = $self->append_format_check($args,$fmt,'password','--password')
+    if $num_fields > 2;
 
   my $opbox = '--inputbox';
-  $opbox = '--2inputsbox' if $val == 2;
-  $opbox = '--3inputsbox' if $val == 3;
+  $opbox = '--2inputsbox' if $num_fields == 2;
+  $opbox = '--3inputsbox' if $num_fields == 3;
 
   $fmt = $self->append_format($fmt,$opbox.' {{text}} {{height}} {{width}}');
-  $fmt = $self->append_format($fmt,'"'.($args->{'entry'}||$args->{'init'}).'"') if $val == 1;
-  $fmt = $self->append_format($fmt,'"'.($args->{'label1'}||'').'"') if $val > 1;
-  $fmt = $self->append_format($fmt,'"'.($args->{'input1'}||'').'"') if $val > 1;
-  $fmt = $self->append_format($fmt,'"'.($args->{'label2'}||'').'"') if $val >= 2;
-  $fmt = $self->append_format($fmt,'"'.($args->{'input2'}||'').'"') if $val >= 2;
-  $fmt = $self->append_format($fmt,'"'.($args->{'label3'}||'').'"') if $val >= 3;
-  $fmt = $self->append_format($fmt,'"'.($args->{'input3'}||'').'"') if $val >= 3;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'entry'}||$args->{'init'}))
+    if $num_fields == 1;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'label1'}||''))
+    if $num_fields > 1;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'input1'}||''))
+    if $num_fields > 1;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'label2'}||''))
+    if $num_fields >= 2;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'input2'}||''))
+    if $num_fields >= 2;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'label3'}||''))
+    if $num_fields >= 3;
+  $fmt = $self->append_format($fmt,shell_quote($args->{'input3'}||''))
+    if $num_fields >= 3;
 
   my $command = $self->prepare_command
     ( $args, $fmt,
@@ -913,34 +800,14 @@ sub inputbox {
     );
 
   my ($rv,$text);
-  if ($val == 1) {
+  if ($num_fields == 1) {
 		($rv,$text) = $self->command_string($command);
+    return($rv == 0 ? $text : 0);
   }
-  else {
-		($rv,$text) = $self->command_array($command);
-  }
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		if ($val == 1) {
-			$self->ra($text);
-			$self->rs($text);
-		}
-    else {
-			$self->ra(@$text);
-			$self->rs(join("\n",@$text));
-		}
-		$this_rv = $text;
-  }
+  ($rv,$text) = $self->command_array($command);
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $text : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 sub inputsbox2 {
   my $self = shift();
@@ -982,26 +849,16 @@ sub msgbox {
   $fmt = $self->append_format($fmt,'--'.$args->{'msgbox'});
   $fmt = $self->append_format($fmt,'{{text}} {{height}} {{width}}');
   my $wait = ($args->{'wait'} ? $args->{'wait'}*1000 : ($args->{'timeout'}||'5000'));
-  $fmt = $self->append_format($fmt,'"'.$wait.'"') if $args->{'msgbox'} eq 'infobox';
+  $fmt = $self->append_format($fmt,shell_quote($wait))
+    if $args->{'msgbox'} eq 'infobox';
   my $command = $self->prepare_command
     ( $args, $fmt,
       text => $self->make_kvt($args,$args->{'text'}),
     );
 
   my $rv = $self->command_state($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$this_rv = 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 
 #  --infobox     <text> <height> <width> [<timeout>]
@@ -1040,21 +897,9 @@ sub textbox {
     );
 
   my ($rv,$text) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(($text) ? [ $text ] : 'null');
-		$self->rs($text||'null');
-		$this_rv = $text || 1;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $text : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 sub editbox {
   my $self = shift();
@@ -1091,21 +936,8 @@ sub menu {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #  --checklist   <text> <height> <width> <list height> <tag1> <item1> <status1> {<help1>}...
@@ -1132,22 +964,9 @@ sub checklist {
     );
 
   my ($rv,$selected) = $self->command_array($command);
-
-  $self->rv($rv||'null');
-  $self->rs('null');
-  $self->ra('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra(@$selected);
-		$self->rs(join("\n",@$selected));
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv) unless ref($this_rv) eq "ARRAY";
-  return(@{$this_rv});
+  return($rv == 0 ? $selected : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0));
 }
 
 #  --radiolist   <text> <height> <width> <list height> <tag1> <item1> <status1> {<help1>}...
@@ -1174,21 +993,8 @@ sub radiolist {
     );
 
   my ($rv,$selected) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($selected);
-		$self->rs($selected);
-		$this_rv = $selected;
-  }
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #  --fselect     <file> <height> <width>
@@ -1213,22 +1019,9 @@ sub fselect {
       path => $self->make_kvl($args,$args->{'path'}),
     );
 
-  my ($rv,$file) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($file);
-		$self->rs($file);
-		$this_rv = $file;
-  }
+  my ($rv,$selected) = $self->command_string($command);
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #  --dselect     <directory> <height> <width>
@@ -1253,22 +1046,9 @@ sub dselect {
       path => $self->make_kvl($args,$args->{'path'}),
     );
 
-  my ($rv,$file) = $self->command_string($command);
-
-  $self->rv($rv||'null');
-  $self->ra('null');
-  $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-		$this_rv = 0;
-  }
-  else {
-		$self->ra($file);
-		$self->rs($file);
-		$this_rv = $file;
-  }
+  my ($rv,$selected) = $self->command_string($command);
   $self->_post($args);
-  return($this_rv);
+  return($rv == 0 ? $selected : 0);
 }
 
 #  --gauge       <text> <height> <width> [<percent>]
@@ -1297,8 +1077,10 @@ sub progress_start {
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--progress');
   $fmt = $self->append_format($fmt,'{{text}} {{height}} {{width}}');
-  $fmt = $self->append_format($fmt,'"'.($args->{'maxdots'}||'').'"') if $args->{'maxdots'} or $args->{'msglen'};
-  $fmt = $self->append_format($fmt,'"'.($args->{'msglen'}||'').'"') if $args->{'msglen'};
+  $fmt = $self->append_format($fmt,shell_quote($args->{'maxdots'}||''))
+    if $args->{'maxdots'} or $args->{'msglen'};
+  $fmt = $self->append_format($fmt,shell_quote($args->{'msglen'}||''))
+    if $args->{'msglen'};
   my $command = $self->prepare_command
     ( $args, $fmt,
       text => $self->make_kvt($args,$args->{'text'}),
@@ -1314,14 +1096,7 @@ sub progress_start {
   $self->rv($rv||'null');
   $self->ra('null');
   $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-    $this_rv = 0;
-  }
-  else {
-    $this_rv = 1;
-  }
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub gauge_start {
   my $self = shift();
@@ -1344,7 +1119,8 @@ sub gauge_start {
   $fmt = $self->append_format_base($args,$fmt);
   $fmt = $self->append_format($fmt,'--progress');
   $fmt = $self->append_format($fmt,'{{text}} {{height}} {{width}} {{percentage}}');
-  $fmt = $self->append_format($fmt,'"'.($args->{'msglen'}||'').'"') if $args->{'msglen'};
+  $fmt = $self->append_format($fmt,shell_quote($args->{'msglen'}||''))
+    if $args->{'msglen'};
   my $command = $self->prepare_command
     ( $args, $fmt,
       text => $self->make_kvt($args,$args->{'text'}),
@@ -1362,14 +1138,7 @@ sub gauge_start {
   $self->rv($rv||'null');
   $self->ra('null');
   $self->rs('null');
-  my $this_rv;
-  if ($rv && $rv >= 1) {
-    $this_rv = 0;
-  }
-  else {
-    $this_rv = 1;
-  }
-  return($this_rv);
+  return($rv == 0 ? 1 : 0);
 }
 sub progress_inc {
   my $self = $_[0];
