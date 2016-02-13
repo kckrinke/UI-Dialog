@@ -36,7 +36,7 @@ use FileHandle;
 BEGIN {
     use vars qw( $VERSION @ISA );
     @ISA = qw( UI::Dialog::Backend );
-    $VERSION = '1.17';
+    $VERSION = '1.18';
 }
 
 sub new {
