@@ -511,7 +511,8 @@ sub calendar {
     $self->ra(split(m!/!,$date));
   }
   $self->_post($args);
-  return($rv == 0 ? $date : 0);
+  return($rv == 0 ? $date : 0) unless defined wantarray and wantarray;
+  return($rv == 0 ? $self->ra() : (0,0,0));
 }
 
 #:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
