@@ -20,15 +20,13 @@ use 5.006;
 use strict;
 use warnings;
 use Carp;
-
-
-#
-# Please read the POD for copyright and licensing issues.
-#
+use UI::Dialog::Backend;
+use FileHandle;
 
 BEGIN {
-    use vars qw($VERSION);
-    $VERSION = '1.18';
+  use vars qw( $VERSION @ISA );
+  @ISA = qw( UI::Dialog::Backend );
+  $VERSION = '1.18';
 }
 
 sub new {
@@ -36,6 +34,11 @@ sub new {
     my $class = ref($proto) || $proto;
     my $self = {};
     bless($self, $class);
+    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('nautilus');
+    $self->{'_opts'}->{'bin'} ||= $self->_find_bin('caja');
+    unless (-x $self->{'_opts'}->{'bin'}) {
+      croak("the nautilus binary could not be found at: ".$self->{'_opts'}->{'bin'});
+    }
     return($self);
 }
 
