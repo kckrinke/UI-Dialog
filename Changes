@@ -1,3 +1,8 @@
+1.19 - Sun, 21 Feb 2016 18:26:22 -0500
+
+ * Nautilus and XOSD tweaks, tests shouldn't fail now
+ * minor changes
+
 1.18 - Fri, 12 Feb 2016 21:48:42 -0500
 
  * xdialog cleaned up, example script and test included
