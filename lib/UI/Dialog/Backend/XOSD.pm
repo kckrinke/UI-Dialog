@@ -194,7 +194,7 @@ sub gauge {
     $percent = (($percent <= 100 && $percent >= 0) ? $percent : 0 );
     my $perc = int((($length / 100) * $percent));
     substr($bar,($perc||0),1,($args->{'mark'}||"|"));
-    my $text = ($args->{'text'}||'')."\n";
+    my $text = $args->{'text'} ? $args->{'text'}."\n" : '';
     $text .= $percent."% ".$bar."\n";
     if (open(XOSD,"| ".$self->{'_opts'}->{'bin'}.$opts." -")) {
 		print XOSD $text;
@@ -243,7 +243,7 @@ sub display_gauge {
     $percent = (($percent <= 100 && $percent >= 0) ? $percent : 0 );
     my $perc = int((($length / 100) * $percent));
     substr($bar,($perc||0),1,($args->{'mark'}||"|"));
-    my $text = ($_[2]||'')."\n";
+    my $text = $_[2] ? $_[2]."\n" : '';
     $text .= $percent."% ".$bar."\n";
     my $fh = $self->{'_DISPLAY'}->{'FH'};
     $SIG_CODE->{$$} = $self; local $SIG{'PIPE'} = \&_del_gauge;
