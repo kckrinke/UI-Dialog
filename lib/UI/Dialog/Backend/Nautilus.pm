@@ -148,29 +148,17 @@ sub geometry {
 sub _get_desktop_dir {
     my $self = shift();
     my $desktop_dir = $ENV{'HOME'} . "/Desktop";
-    if ( eval { require Gnome2::GConf; 1; } ) {
-        use Gnome2::GConf;
-        my $gconf = Gnome2::GConf::Client->get_default();
-        $desktop_dir = $ENV{'HOME'}
-         if $gconf->get_bool( '/apps/nautilus/preferences/desktop_is_home_dir' );
-    } else {
-        my $gconf_xml = $ENV{'HOME'} . '/.gconf/apps/nautilus/preferences/%gconf.xml';
-        if ( -r $gconf_xml ) {
-            if ( open( GCONF, "<" . $gconf_xml ) ) {
-                my $RAW = undef;
-                {
-                    local $/;
-                    $RAW = <GCONF>;
-                }
-                close( GCONF );
-                #        <entry name="desktop_is_home_dir" mtime="1090894369" type="bool" value="true">
-                if ( $RAW =~ m!\s+[^"]+\"desktop_is_home_dir\"[^"]+\"\d*\"[^"]+\"bool\"\svalue=\"false\"\>! ) {
-                    $desktop_dir = $ENV{'HOME'};
-                }
-            }
-        }
+    if ( exists $ENV{'HOME'} ) {
+      return( $ENV{'HOME'}.'/Desktop' )
+        if -d $ENV{'HOME'}.'/Desktop';
     }
-    return( $desktop_dir );
+    my @user = getpwuid($>);
+    my $home = undef;
+    if (@user > 7 && -d $user[7])
+      $home = $user[7];
+    if (-d $home."/Desktop")
+      return $home."/Desktop";
+    return '/home/'.$ENV{'USER'}.'/Desktop'; # may be undef?
 }
 
 1;
