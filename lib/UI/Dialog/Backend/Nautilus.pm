@@ -147,30 +147,33 @@ sub geometry {
 
 sub _get_desktop_dir {
     my $self = shift();
-    my $desktop_dir = $ENV{'HOME'} . "/Desktop";
-    if ( eval { require Gnome2::GConf; 1; } ) {
-        use Gnome2::GConf;
-        my $gconf = Gnome2::GConf::Client->get_default();
-        $desktop_dir = $ENV{'HOME'}
-         if $gconf->get_bool( '/apps/nautilus/preferences/desktop_is_home_dir' );
-    } else {
-        my $gconf_xml = $ENV{'HOME'} . '/.gconf/apps/nautilus/preferences/%gconf.xml';
-        if ( -r $gconf_xml ) {
-            if ( open( GCONF, "<" . $gconf_xml ) ) {
-                my $RAW = undef;
-                {
-                    local $/;
-                    $RAW = <GCONF>;
-                }
-                close( GCONF );
-                #        <entry name="desktop_is_home_dir" mtime="1090894369" type="bool" value="true">
-                if ( $RAW =~ m!\s+[^"]+\"desktop_is_home_dir\"[^"]+\"\d*\"[^"]+\"bool\"\svalue=\"false\"\>! ) {
-                    $desktop_dir = $ENV{'HOME'};
-                }
-            }
-        }
+    # Figure out the user's home directory
+    my @user = getpwuid($>);
+    my $home = undef;
+    if (@user > 7 && -d $user[7]) {
+      $home = $user[7];
     }
-    return( $desktop_dir );
+    # check for XDG paths to home directory
+    my $xdg_desktop_dir = $ENV{XDG_DESKTOP_DIR} || undef;
+    if (defined $xdg_desktop_dir && -d $xdg_desktop_dir) {
+      return $xdg_desktop_dir;
+    }
+    my $xdg_config_home = $ENV{XDG_CONFIG_HOME} || $home.'/.config';
+    if (-d $xdg_config_home && -f $xdg_config_home.'/user-dirs.dirs') {
+      foreach (`. "${xdg_config_home}/user-dirs.dirs"; env`) {
+        chomp;
+        next unless /=/;
+        my ($var, $value) = split(/=/, $_);
+        $ENV{$var} = $value;
+      }
+    }
+    $xdg_desktop_dir = $ENV{XDG_DESKTOP_DIR} || undef;
+    if (defined $xdg_desktop_dir && -d $xdg_desktop_dir) {
+      return $xdg_desktop_dir;
+    }
+    return $home."/Desktop" if -d $home."/Desktop";
+    # finally defaulting to just home
+    return $home;
 }
 
 1;
