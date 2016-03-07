@@ -1,3 +1,10 @@
+1.20 - Sun, 6 Mar 2016 21:03:33 -0555
+
+ * Removed Gconf module cludges from Nautilus
+ * Nautilus example and backend general tweaks
+ * Closes github issue 21
+ * Renamed COPYRIGHT to LICENSE
+
 1.19 - Sun, 21 Feb 2016 18:26:22 -0500
 
  * Nautilus and XOSD tweaks, tests shouldn't fail now
