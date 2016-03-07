@@ -147,18 +147,33 @@ sub geometry {
 
 sub _get_desktop_dir {
     my $self = shift();
-    my $desktop_dir = $ENV{'HOME'} . "/Desktop";
-    if ( exists $ENV{'HOME'} ) {
-      return( $ENV{'HOME'}.'/Desktop' )
-        if -d $ENV{'HOME'}.'/Desktop';
-    }
+    # Figure out the user's home directory
     my @user = getpwuid($>);
     my $home = undef;
-    if (@user > 7 && -d $user[7])
+    if (@user > 7 && -d $user[7]) {
       $home = $user[7];
-    if (-d $home."/Desktop")
-      return $home."/Desktop";
-    return '/home/'.$ENV{'USER'}.'/Desktop'; # may be undef?
+    }
+    # check for XDG paths to home directory
+    my $xdg_desktop_dir = $ENV{XDG_DESKTOP_DIR} || undef;
+    if (defined $xdg_desktop_dir && -d $xdg_desktop_dir) {
+      return $xdg_desktop_dir;
+    }
+    my $xdg_config_home = $ENV{XDG_CONFIG_HOME} || $home.'/.config';
+    if (-d $xdg_config_home && -f $xdg_config_home.'/user-dirs.dirs') {
+      foreach (`. "${xdg_config_home}/user-dirs.dirs"; env`) {
+        chomp;
+        next unless /=/;
+        my ($var, $value) = split(/=/, $_);
+        $ENV{$var} = $value;
+      }
+    }
+    $xdg_desktop_dir = $ENV{XDG_DESKTOP_DIR} || undef;
+    if (defined $xdg_desktop_dir && -d $xdg_desktop_dir) {
+      return $xdg_desktop_dir;
+    }
+    return $home."/Desktop" if -d $home."/Desktop";
+    # finally defaulting to just home
+    return $home;
 }
 
 1;
