@@ -1,6 +1,5 @@
 Changes
 CONTRIBUTORS
-COPYRIGHT
 examples/ascii.pl
 examples/cdialog.pl
 examples/console.pl
@@ -54,6 +53,7 @@ lib/UI/Dialog/Screen/Druid.pm
 lib/UI/Dialog/Screen/Druid.pod
 lib/UI/Dialog/Screen/Menu.pm
 lib/UI/Dialog/Screen/Menu.pod
+LICENSE
 Makefile.PL
 MANIFEST			This list of files
 META.yml			Module meta-data (added by MakeMaker)
