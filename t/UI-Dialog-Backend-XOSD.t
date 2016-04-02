@@ -4,7 +4,6 @@ require_ok( 'UI::Dialog::Backend::XOSD' );
 
 # #########################
 
-
 eval { new UI::Dialog::Backend::XOSD (test_mode=>1); };
 if ( $@ ) {
   if ($@ =~ m!binary could not be found!) {

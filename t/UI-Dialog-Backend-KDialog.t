@@ -1,18 +1,8 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 1.t'
-
-#########################
-
 use Test::More;
 BEGIN { use_ok( 'UI::Dialog::Backend::KDialog' ); }
 require_ok( 'UI::Dialog::Backend::KDialog' );
 
 #########################
-
-#
-#: First, need to make sure /usr/bin/dialog exists and if the backend
-#: module is even usable.
-#
 
 eval { new UI::Dialog::Backend::KDialog(test_mode=>1); };
 if ( $@ ) {
