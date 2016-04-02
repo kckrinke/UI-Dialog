@@ -1,4 +1,9 @@
-1.20 - Sun, 6 Mar 2016 21:03:33 -0555
+1.21 - Sat, 2 Apr 2016 18:04:33 -0500
+
+ * Refactored unit tests to not fail unless it's during actual testing
+ * All unit test scripts are consistently formatted
+
+1.20 - Sun, 6 Mar 2016 21:03:33 -0500
 
  * Removed Gconf module cludges from Nautilus
  * Nautilus example and backend general tweaks
